@@ -1,0 +1,5 @@
+autoload=no
+bootdelay=5
+preboot=run readmac buildmac
+readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
+buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; setenv e "$e$sep$b" ; setenv sep : ; done && setenv ethaddr $e && echo == MAC address set to $ethaddr from eeprom
