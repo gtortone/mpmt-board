@@ -1,0 +1,12 @@
+export LS_OPTIONS='--color=auto'
+eval "`dircolors`"
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -l'
+alias l='ls $LS_OPTIONS -lA'
+
+# XC3SPROG
+export XCDB=/etc/xc3sprog/devlist.txt
+export CABLEDB=/etc/xc3sprog/cablelist.txt
+
+# XVC
+alias start_xvc='/opt/xvc-adaptive/bin/xvcServer --driver FTDI --cfreq 15000000 --interface 2'

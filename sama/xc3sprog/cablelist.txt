@@ -1,0 +1,2 @@
+#Alias              Type    Frequency OptString
+ftdi                ftdi    15000000  0x0403:0x6010::2
