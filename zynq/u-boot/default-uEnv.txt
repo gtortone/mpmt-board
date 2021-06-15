@@ -1,5 +1,12 @@
 autoload=no
 bootdelay=5
+ethprime=ethernet@e000b000
 preboot=run readmac buildmac
 readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
-buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; setenv e "$e$sep$b" ; setenv sep : ; done && setenv ethaddr $e && echo == MAC address set to $ethaddr from eeprom
+buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; setenv e "$e$sep$b" ; setenv sep : ; done && env set ethaddr $e && echo == MAC address set to $ethaddr from eeprom
+devicetree_load_address=0x2000000
+kernel_load_address=0x2080000
+netboot=dhcp && setenv bootargs earlyprintk root=/dev/nfs ip=dhcp nfsroot=${serverip}:/srv/nfs/mpmt/zynq/rootfs/debian10,nfsvers=3,tcp rw loglevel=8 nfsrootdebug && tftpboot ${kernel_load_address} /mpmt/zynq/boot/uImage && tftpboot ${devicetree_load_address} /mpmt/zynq/boot/devicetree.dtb && bootm ${kernel_load_address} - ${devicetree_load_address}
+emmcboot=setenv bootargs console=ttyPS0,115200 earlyprintk earlycon root=/dev/mmcblk0p2 rootwait clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio && load mmc 0 ${kernel_load_address} uImage && load mmc 0 ${devicetree_load_address} devicetree.dtb && bootm ${kernel_load_address} - ${devicetree_load_address}
+bootmedia=emmc
+bootcmd=run ${bootmedia}boot
