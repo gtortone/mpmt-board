@@ -7,3 +7,6 @@ alias l='ls $LS_OPTIONS -lA'
 # RunControl
 alias rc='/opt/mpmt-board-cli/runcontrol/rc.py'
 
+# HighVoltage
+alias hv='/opt/mpmt-board-cli/highvoltage/hv.py'
+
