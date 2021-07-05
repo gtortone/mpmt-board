@@ -10,3 +10,5 @@ alias rc='/opt/mpmt-board-cli/runcontrol/rc.py'
 # HighVoltage
 alias hv='/opt/mpmt-board-cli/highvoltage/hv.py'
 
+# Sensors
+alias sn='/opt/mpmt-board-cli/sensors/sn.py'
