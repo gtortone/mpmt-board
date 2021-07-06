@@ -12,3 +12,6 @@ alias hv='/opt/mpmt-board-cli/highvoltage/hv.py'
 
 # Sensors
 alias sn='/opt/mpmt-board-cli/sensors/sn.py'
+
+# fpgautil
+alias fpgautil='/opt/mpmt-board-cli/fpgautil/fpgautil'
