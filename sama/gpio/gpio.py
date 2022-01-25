@@ -8,11 +8,13 @@ pin = {}
 pin['ftdi'] = 'PA16'
 pin['fpga'] = 'PB16'
 pin['jtag'] = 'PB20'
+pin['arm'] = 'PC11'
 
 cmd = {}
 cmd['ftdi'] = ['enable', 'disable']
 cmd['fpga'] = ['reset']
 cmd['jtag'] = ['enable', 'disable']
+cmd['arm'] = ['reset']
 
 if len(sys.argv) > 2:
     device = sys.argv[1]
@@ -22,6 +24,7 @@ else:
     print('device: ftdi - commands: enable/disable')
     print('device: jtag - commands: enable/disable')
     print('device: fpga - command: reset')
+    print('device: arm - command: reset')
     sys.exit()
 
 if (cmd.get(device) is None):
@@ -49,9 +52,9 @@ if (command == 'enable'):
 elif (command == 'disable'):
     line.set_value(0)
 elif (command == 'reset'):
-    line.set_value(1)
-    time.sleep(0.2)
     line.set_value(0)
+    time.sleep(0.2)
+    line.set_value(1)
 
 print('OK')
 
