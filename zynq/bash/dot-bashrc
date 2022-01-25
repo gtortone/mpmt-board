@@ -7,3 +7,11 @@ alias l='ls $LS_OPTIONS -lA'
 # RunControl
 alias rc='/opt/mpmt-board-cli/runcontrol/rc.py'
 
+# HighVoltage
+alias hv='/opt/mpmt-board-cli/highvoltage/hv.py'
+
+# Sensors
+alias sn='/opt/mpmt-board-cli/sensors/sn.py'
+
+# fpgautil
+alias fpgautil='/opt/mpmt-board-cli/fpgautil/fpgautil'
