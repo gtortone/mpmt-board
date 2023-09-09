@@ -12,4 +12,5 @@ export CABLEDB=/etc/xc3sprog/cablelist.txt
 alias start_xvc='/opt/xvc-adaptive/bin/xvcServer --driver FTDI --cfreq 15000000 --interface 2'
 
 # GPIO
-alias gpio='/opt/mPMT-board/sama/gpio/gpio.py'
+# alias gpio='/opt/mPMT-board/sama/gpio/gpio.py'
+source /usr/bin/gpio.sh
