@@ -1,0 +1,22 @@
+From 430e5a12051f92bae07d18abd51460eb365a7355 Mon Sep 17 00:00:00 2001
+From: Gennaro Tortone <gennaro.tortone@na.infn.it>
+Date: Sat, 9 Sep 2023 22:54:07 +0200
+Subject: [PATCH] fix build on Atmel SAMA5D27
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9fde713..c9e5a51 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,7 @@ set(xc3sprog_VERSION_MAJOR 0)
+ set(xc3sprog_VERSION_MINOR 0)
+ 
+ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+-set(CMAKE_CXX_FLAGS "-g -Wall")
++set(CMAKE_CXX_FLAGS "-g -Wall -std=gnu++11 -mthumb -mfpu=neon-vfpv4 -mfloat-abi=hard -mcpu=cortex-a5 -fstack-protector-strong")
+ cmake_minimum_required(VERSION 2.6)
+ 
+ find_package(PkgConfig REQUIRED)
