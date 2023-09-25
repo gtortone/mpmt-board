@@ -2,7 +2,8 @@ autoload=no
 bootcmd=run boot${bootdev}
 bootdev=net
 mmcdev=0
-bootnet=dhcp;setenv bootargs console=ttyS0,115200;tftp 0x21000000 at91-sama5d27_som1_ek.dtb;tftp 0x21100000 zImage;tftp 0x21A00000 rootfs.cpio.gz;bootz 0x21100000 0x21A00000 0x21000000
+tftpdir=mpmt/sama
+bootnet=dhcp;setenv bootargs console=ttyS0,115200;tftp 0x21000000 ${tftpdir}/at91-sama5d27_som1_ek.dtb;tftp 0x21100000 ${tftpdir}/zImage;tftp 0x21A00000 ${tftpdir}/rootfs.cpio.gz;bootz 0x21100000 0x21A00000 0x21000000
 bootmmc=setenv bootargs console=ttyS0,115200;mmc rescan;fatload mmc ${mmcdev}:0 0x21000000 at91-sama5d27_som1_ek.dtb;fatload mmc ${mmcdev}:0 0x21100000 zImage;fatload mmc ${mmcdev}:0 0x21A00000 rootfs.cpio.gz;bootz 0x21100000 0x21A00000 0x21000000
 bootemmc=setenv mmcdev 0;run bootmmc
 bootsd=setenv mmcdev 1;run bootmmc
