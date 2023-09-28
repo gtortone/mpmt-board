@@ -3946,6 +3946,7 @@ CONFIG_u-dma-buf=y
 #
 # user packages 
 #
+CONFIG_libmodbus=y
 
 #
 # PetaLinux RootFS Settings

@@ -3,3 +3,4 @@
 
 CONFIG_u-dma-buf
 CONFIG_dma-proxy
+CONFIG_libmodbus
