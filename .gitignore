@@ -1,0 +1,4 @@
+
+sama/image-builder/*.img
+sama/image-builder/*.tar.gz
+sama/image-builder/*.bmap
