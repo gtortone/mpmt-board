@@ -1,0 +1,171 @@
+{{- $image := or .image "debian11.img" -}}
+
+architecture: armhf
+
+actions:
+
+  - action: debootstrap
+    suite: "bullseye"
+    components:
+      - main
+    mirror: https://deb.debian.org/debian
+    variant: minbase
+
+  - action: apt
+    packages: 
+      - sudo
+      - openssh-server
+      - systemd-sysv
+
+  - action: run
+    chroot: true
+    command: echo zynq > /etc/hostname
+
+  - action: apt
+    packages:
+      - apt-utils
+      - dialog
+      - locales
+      - bash-completion
+
+  - action: apt
+    packages:
+      - minicom
+      - picocom
+      - curl
+      - haveged
+      - dhcpcd5
+      - fdisk
+      - udev 
+      - netbase 
+      - ifupdown 
+      - iputils-ping 
+      - wget 
+      - net-tools
+      - ntpdate
+      - nano
+      - less
+      - kmod 
+      - vim
+      - file
+      - resolvconf
+      - iperf3
+
+  - action: apt
+    packages:
+      - parted
+      - git
+      - ca-certificates
+
+  - action: apt
+    packages:
+      - man-db
+      - gcc 
+      - g++ 
+      - tcl
+      - python3
+      - python3-pip
+      - make 
+      - pkg-config 
+      - ntp 
+      - libusb-dev 
+      - cmake 
+      - zlib1g 
+      - zlib1g-dev 
+      - usbutils
+      - stm32flash
+      - i2c-tools
+      - nfs-common
+
+  - action: apt
+    packages:
+      - python3-numpy
+      - python3-dev
+      - libfmt7
+      - libfmt-dev
+      - libboost-iostreams1.74.0
+      - libboost-iostreams1.74-dev
+      - libboost-date-time1.74.0
+      - libboost-date-time1.74-dev
+      - libboost-serialization1.74.0
+      - libboost-serialization1.74-dev
+
+  - action: run
+    chroot: true
+    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2
+
+  - action: overlay
+    source: overlays/boot
+    destination: /boot
+
+  - action: run
+    chroot: true
+    script: scripts/untar-modules.sh
+
+  - action: run
+    chroot: true
+    script: scripts/install-mpmt-board-cli.sh
+
+  - action: run
+    chroot: true
+    script: scripts/install-libzmq.sh
+
+  - action: run
+    chroot: true
+    script: scripts/install-tooldaq.sh
+
+  - action: run
+    chroot: true
+    command: echo "en_US.UTF-8 UTF-8" > /etc/locale.gen; /usr/sbin/locale-gen; /usr/sbin/update-locale LANG=en_US.UTF-8
+
+  - action: overlay
+    source: overlays/sshd
+    destination: /etc/ssh
+
+  - action: overlay
+    source: overlays/bash/bashrc
+    destination: /root/.bashrc
+
+  - action: overlay
+    source: overlays/vim/vimrc
+    destination: /root/.vimrc
+
+  - action: overlay
+    source: overlays/network
+    destination: /etc/network/interfaces.d
+
+  - action: overlay
+    source: overlays/rc
+    destination: /etc
+
+  - action: run
+    chroot: true
+    command: systemctl enable serial-getty@ttyPS0.service
+
+  - action: run
+    chroot: true
+    command: echo "ttyPS0" >> /etc/securetty
+
+  - action: run
+    chroot: true
+    command: echo 'root:$1$TzpfaNEc$tjqCamkIJFUytJokydS8w.' | /usr/sbin/chpasswd -e
+
+  - action: image-partition
+    imagename: {{ $image }}
+    imagesize: 1.5GB
+    partitiontype: msdos
+    mountpoints:
+      - mountpoint: /
+        partition: rootfs
+    partitions:
+      - name: rootfs
+        features: ["^orphan_file"]
+        fs: ext4
+        start: 0%
+        end: 100%
+
+  - action: filesystem-deploy
+    description: Deploying filesystem onto image
+
+  - action: pack
+    file: zynq-mpmt-debian11.tar.gz

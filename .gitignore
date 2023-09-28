@@ -2,3 +2,5 @@
 sama/image-builder/*.img
 sama/image-builder/*.tar.gz
 sama/image-builder/*.bmap
+zynq/image-builder/*.img
+zynq/image-builder/*.tar.gz
