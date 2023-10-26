@@ -24,4 +24,5 @@
 	"bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}\0" \
 	"bootmedia=mmc\0" \
 	"bootcmd=run boot${bootmedia}\0" \
-	"flash_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 0 0 && sf erase 0 0x1000000 && sf write 0x09000000 0 ${filesize}\0"
+	"flash_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 10000000 0 && sf erase 0 0x1000000 && sf write 0x09000000 0 ${filesize}\0" \
+	"verify_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 10000000 0 && sf read 0xA000000 0 ${filesize} && cmp.b 0x09000000 0xA000000 ${filesize}\0"
