@@ -301,7 +301,7 @@ CONFIG_mtd-utils=y
 #
 # tar 
 #
-# CONFIG_tar is not set
+CONFIG_tar=y
 # CONFIG_tar-dev is not set
 # CONFIG_tar-rmt is not set
 # CONFIG_tar-dbg is not set
@@ -3381,7 +3381,7 @@ CONFIG_bridge-utils=y
 #
 # netcat 
 #
-# CONFIG_netcat is not set
+CONFIG_netcat=y
 # CONFIG_netcat-dbg is not set
 # CONFIG_netcat-dev is not set
 
