@@ -19,7 +19,7 @@
 	"bootargs=earlyprintk earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio\0" \
 	"devicetree_load_address=0x2000000\0" \
 	"kernel_load_address=0x2080000\0" \
-	"initrd_load_address=0x2A00000\0" \
+	"initrd_load_address=0x5000000\0" \
 	"bootnet=dhcp && tftpboot ${kernel_load_address} /mpmt/zynq/zImage && tftpboot ${devicetree_load_address} /mpmt/zynq/system.dtb && tftpboot ${initrd_load_address} /mpmt/zynq/rootfs.cpio.gz && bootz ${kernel_load_address} ${initrd_load_address} ${devicetree_load_address}\0" \
 	"bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}\0" \
 	"bootmedia=mmc\0" \
