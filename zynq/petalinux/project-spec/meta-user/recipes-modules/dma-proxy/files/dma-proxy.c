@@ -192,6 +192,8 @@ static void start_transfer(struct dma_proxy_channel *pchannel_p)
 	struct dma_device *dma_device = pchannel_p->channel_p->device;
 	int bdindex = pchannel_p->bdindex;
 
+   /* printk(KERN_INFO "DBG: inside start_transfer - bdindex: %d\n", bdindex); */
+
 	/* A single entry scatter gather list is used as it's not clear how to do it with a simpler method.
 	 * Get a descriptor for the transfer ready to submit
 	 */
