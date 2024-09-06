@@ -14,6 +14,8 @@
 [ -d /etc/boot.d ] && run-parts /etc/boot.d
 
 # program PL
+# note: copy system.bit.bin file in /lib/firmware
+#
 echo 0 > /sys/class/fpga_manager/fpga0/flags
 echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
 
