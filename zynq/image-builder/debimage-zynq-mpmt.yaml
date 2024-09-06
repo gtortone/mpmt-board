@@ -168,4 +168,5 @@ actions:
     description: Deploying filesystem onto image
 
   - action: pack
-    file: zynq-mpmt-debian11.tar.gz
+    compression: none
+    file: zynq-mpmt-debian11.tar
