@@ -35,9 +35,6 @@
 
 &amba_pl {
    RunControl_AXI_0: RunControl_AXI@43d00000 {
-      clock-names = "S_AXI_ACLK";
-      clocks = <&clkc 15>;
       compatible = "generic-uio";
-      reg = <0x43d00000 0x10000>;
    };
 };
