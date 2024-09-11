@@ -1,2 +1,11 @@
+/*
+When RunControl_AXI will be integrated in block design uncomment following block
+*/
+
+/*
 / {
+   &RunControl_AXI_0 {
+      compatible = "generic-uio";
+   };
 };
+*/
