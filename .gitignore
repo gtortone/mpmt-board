@@ -5,3 +5,11 @@ sama/image-builder/*.bmap
 zynq/image-builder/*.img
 zynq/image-builder/*.tar.gz
 zynq/image-builder/*.tar
+
+zynq/petalinux/project-spec/configs/*.old
+zynq/petalinux/project-spec/configs/config
+
+zynq/image-builder/overlays/boot/modules.tar.gz
+zynq/image-builder/overlays/boot/system.dtb
+zynq/image-builder/overlays/boot/zImage
+

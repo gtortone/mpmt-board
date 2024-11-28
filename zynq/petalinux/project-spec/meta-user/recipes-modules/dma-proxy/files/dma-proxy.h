@@ -23,15 +23,16 @@
  * otherwise there may be issues when using cached memory.
  */
 
-#define BUFFER_SIZE (32 * 1024)	 		   /* must match driver exactly */
-#define BUFFER_COUNT 9500			   /* driver only */
+#define BUFFER_SIZE (32 * 1024)           /* must match driver exactly */
+#define BUFFER_COUNT 9500           /* driver only */
 
-#define FINISH_XFER 	_IOW('a','a',int32_t*)
+#define FINISH_XFER  _IOW('a','a',int32_t*)
 #define START_XFER   _IOW('a','b',int32_t*)
-#define XFER 			_IOR('a','c',int32_t*)
+#define XFER         _IOR('a','c',int32_t*)
 
 struct channel_buffer {
-	unsigned int buffer[BUFFER_SIZE / sizeof(unsigned int)];
-	enum proxy_status { PROXY_NO_ERROR = 0, PROXY_BUSY = 1, PROXY_TIMEOUT = 2, PROXY_ERROR = 3 } status;
-	unsigned int length;
-} __attribute__ ((aligned (1024)));		/* 64 byte alignment required for DMA, but 1024 handy for viewing memory */
+   unsigned int buffer[BUFFER_SIZE / sizeof(unsigned int)];
+   enum proxy_status { PROXY_NO_ERROR = 0, PROXY_BUSY = 1, PROXY_TIMEOUT = 2, PROXY_ERROR = 3 } status;
+   unsigned int length;
+   unsigned int transferred_length;
+} __attribute__ ((aligned (1024)));    /* 64 byte alignment required for DMA, but 1024 handy for viewing memory */

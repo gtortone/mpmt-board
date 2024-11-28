@@ -122,11 +122,12 @@
 
 MODULE_LICENSE("GPL");
 
-#define DRIVER_NAME 			"dma_proxy"
+#define DRIVER_NAME 		"dma_proxy"
 #define TX_CHANNEL			0
 #define RX_CHANNEL			1
-#define ERROR 					-1
+#define ERROR 				-1
 #define TEST_SIZE 			1024
+
 
 /* The following module parameter controls if the internal test runs when the module is inserted.
  * Note that this test requires a transmit and receive channel to function and uses the first
@@ -143,6 +144,10 @@ struct proxy_bd {
 	dma_cookie_t cookie;
 	dma_addr_t dma_handle;
 	struct scatterlist sglist;
+        struct dma_async_tx_descriptor *descriptor;
+        unsigned int buf_addr;
+        unsigned int control;
+        unsigned int status;
 };
 struct dma_proxy_channel {
 	struct channel_buffer *buffer_table_p;	/* user to kernel space interface */
@@ -168,17 +173,63 @@ struct dma_proxy {
 	struct work_struct work;
 };
 
+
 static int total_count;
+
+
+/* Classes by Xilinx */
+#define XILINX_DMA_NUM_APP_WORDS 5
+struct xilinx_axidma_desc_hw {
+    u32 next_desc;
+    u32 next_desc_msb;
+    u32 buf_addr;
+    u32 buf_addr_msb;
+    u32 mcdma_control;
+    u32 vsize_stride;
+    u32 control;
+    u32 status;
+    u32 app[XILINX_DMA_NUM_APP_WORDS];
+} __aligned(64);
+
+struct xilinx_axidma_tx_segment {
+    struct xilinx_axidma_desc_hw hw;
+    struct list_head node;
+    dma_addr_t phys;
+} __aligned(64);
+
+struct xilinx_dma_tx_descriptor {
+    struct dma_async_tx_descriptor async_tx;
+    struct list_head segments;
+    struct list_head node;
+    bool cyclic;
+};
+
 
 /* Handle a callback and indicate the DMA transfer is complete to another
  * thread of control
  */
-static void sync_callback(void *completion)
+static void sync_callback(void *buffer_descriptor)
 {
-	/* Indicate the DMA transaction completed to allow the other
-	 * thread of control to finish processing
-	 */
-	complete(completion);
+    /* Try to read the memory-mapped buffer descriptor */
+    struct proxy_bd *bd = (struct proxy_bd*) buffer_descriptor;
+
+    struct xilinx_dma_tx_descriptor *xilinx_desc;
+    xilinx_desc = container_of(bd->descriptor, struct xilinx_dma_tx_descriptor, async_tx);
+    struct xilinx_axidma_tx_segment *segment;
+    segment = list_first_entry(&xilinx_desc->segments,
+                               struct xilinx_axidma_tx_segment, node);
+    bd->buf_addr = segment->hw.buf_addr;
+    bd->control = segment->hw.control;
+    bd->status = segment->hw.status;
+
+    /*
+      printk("%s: descriptors phys address, written to device: 0x%08x, correct one: 0x%08x, segment->phys: 0x%08x", __func__, bd->descriptor->phys, virt_to_phys(&segment->hw),  segment->phys);
+    */
+
+    /* Indicate the DMA transaction completed to allow the other
+     * thread of control to finish processing
+     */
+    complete(&bd->cmp);
 }
 
 /* Prepare a DMA buffer to be used in a DMA transaction, submit it to the DMA engine
@@ -192,7 +243,8 @@ static void start_transfer(struct dma_proxy_channel *pchannel_p)
 	struct dma_device *dma_device = pchannel_p->channel_p->device;
 	int bdindex = pchannel_p->bdindex;
 
-   /* printk(KERN_INFO "DBG: inside start_transfer - bdindex: %d\n", bdindex); */
+        /* Make sure the transferred bytes fields are intializaed properly */
+        pchannel_p->buffer_table_p[bdindex].transferred_length = 0;
 
 	/* A single entry scatter gather list is used as it's not clear how to do it with a simpler method.
 	 * Get a descriptor for the transfer ready to submit
@@ -201,14 +253,15 @@ static void start_transfer(struct dma_proxy_channel *pchannel_p)
 	sg_dma_address(&pchannel_p->bdtable[bdindex].sglist) = pchannel_p->bdtable[bdindex].dma_handle;
 	sg_dma_len(&pchannel_p->bdtable[bdindex].sglist) = pchannel_p->buffer_table_p[bdindex].length;
 
-	chan_desc = dma_device->device_prep_slave_sg(pchannel_p->channel_p, &pchannel_p->bdtable[bdindex].sglist, 1, 
+	chan_desc = dma_device->device_prep_slave_sg(pchannel_p->channel_p, &pchannel_p->bdtable[bdindex].sglist, 1,
 						pchannel_p->direction, flags, NULL);
 
+        pchannel_p->bdtable[bdindex].descriptor = chan_desc;
 	if (!chan_desc) {
 		printk(KERN_ERR "dmaengine_prep*() error\n");
 	} else {
 		chan_desc->callback = sync_callback;
-		chan_desc->callback_param = &pchannel_p->bdtable[bdindex].cmp;
+		chan_desc->callback_param = &pchannel_p->bdtable[bdindex];
 
 		/* Initialize the completion for the transfer and before using it
 		 * then submit the transaction to the DMA engine so that it's queued
@@ -232,7 +285,6 @@ static void start_transfer(struct dma_proxy_channel *pchannel_p)
  */
 static void wait_for_transfer(struct dma_proxy_channel *pchannel_p)
 {
-	unsigned long timeout = msecs_to_jiffies(3000);
 	enum dma_status status;
 	int bdindex = pchannel_p->bdindex;
 
@@ -240,18 +292,22 @@ static void wait_for_transfer(struct dma_proxy_channel *pchannel_p)
 
 	/* Wait for the transaction to complete, or timeout, or get an error
 	 */
-	timeout = wait_for_completion_timeout(&pchannel_p->bdtable[bdindex].cmp, timeout);
+	wait_for_completion(&pchannel_p->bdtable[bdindex].cmp);
 	status = dma_async_is_tx_complete(pchannel_p->channel_p, pchannel_p->bdtable[bdindex].cookie, NULL, NULL);
 
-	if (timeout == 0)  {
-		pchannel_p->buffer_table_p[bdindex].status  = PROXY_TIMEOUT;
-		printk(KERN_ERR "DMA timed out\n");
-	} else if (status != DMA_COMPLETE) {
+	if (status != DMA_COMPLETE) {
 		pchannel_p->buffer_table_p[bdindex].status = PROXY_ERROR;
 		printk(KERN_ERR "DMA returned completion callback status of: %s\n",
 			   status == DMA_ERROR ? "error" : "in progress");
 	} else
 		pchannel_p->buffer_table_p[bdindex].status = PROXY_NO_ERROR;
+
+        struct proxy_bd *bd = &pchannel_p->bdtable[bdindex];
+        pchannel_p->buffer_table_p[bdindex].transferred_length = (0x7FFFFF & bd->status); /* lower 23 bits*/
+        /*
+          printk("%s: Post transfer descriptor buf_addr=0x%08x control=0x%08x status=0x%08x, xfer length=%u", __func__, bd->buf_addr, bd->control, bd->status, pchannel_p->buffer_table_p[bdindex].transferred_length);
+        */
+
 }
 
 /* The following functions are designed to test the driver from within the device
@@ -340,7 +396,6 @@ static int local_open(struct inode *ino, struct file *file)
  */
 static int release(struct inode *ino, struct file *file)
 {
-#if 0
 	struct dma_proxy_channel *pchannel_p = (struct dma_proxy_channel *)file->private_data;
 	struct dma_device *dma_device = pchannel_p->channel_p->device;
 
@@ -349,6 +404,7 @@ static int release(struct inode *ino, struct file *file)
 	 * This is not working and causes an issue that may need investigation in the 
 	 * DMA driver at the lower level.
 	 */
+#if 0
 	dma_device->device_terminate_all(pchannel_p->channel_p);
 #endif
 	return 0;
@@ -362,11 +418,11 @@ static int release(struct inode *ino, struct file *file)
 static long ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct dma_proxy_channel *pchannel_p = (struct dma_proxy_channel *)file->private_data;
+	dma_addr_t test;
 
 	/* Get the bd index from the input argument as all commands require it
 	 */
-	if(copy_from_user(&pchannel_p->bdindex, (int *)arg, sizeof(pchannel_p->bdindex)))
-		return -EINVAL;
+        copy_from_user(&pchannel_p->bdindex, (int*)arg, sizeof(pchannel_p->bdindex));
 
 	/* Perform the DMA transfer on the specified channel blocking til it completes
 	 */
@@ -496,12 +552,12 @@ static int create_channel(struct platform_device *pdev, struct dma_proxy_channel
 	/* Request the DMA channel from the DMA engine and then use the device from
 	 * the channel for the proxy channel also.
 	 */
-	pchannel_p->dma_device_p = &pdev->dev;
-	pchannel_p->channel_p = dma_request_chan(&pdev->dev, name);
+	pchannel_p->channel_p = dma_request_slave_channel(&pdev->dev, name);
 	if (!pchannel_p->channel_p) {
 		dev_err(pchannel_p->dma_device_p, "DMA channel request error\n");
 		return ERROR;
 	}
+	pchannel_p->dma_device_p = &pdev->dev; 
 
 	/* Initialize the character device for the dma proxy channel
 	 */
@@ -511,8 +567,6 @@ static int create_channel(struct platform_device *pdev, struct dma_proxy_channel
 
 	pchannel_p->direction = direction;
 
-   printk(KERN_INFO "Buffer size: %d - Buffer count: %d\n", sizeof(struct channel_buffer), BUFFER_COUNT);
-
 	/* Allocate DMA memory that will be shared/mapped by user space, allocating
 	 * a set of buffers for the channel with user space specifying which buffer
 	 * to use for a tranfer..
@@ -521,7 +575,7 @@ static int create_channel(struct platform_device *pdev, struct dma_proxy_channel
 		dmam_alloc_coherent(pchannel_p->dma_device_p,
 					sizeof(struct channel_buffer) * BUFFER_COUNT,
 					&pchannel_p->buffer_phys_addr, GFP_KERNEL);
-	printk(KERN_INFO "Allocating memory, virtual address: %px physical address: %px\n",
+	printk(KERN_INFO "Allocating memory, virtual address: %016X physical address: %016X\n", 
 			pchannel_p->buffer_table_p, (void *)pchannel_p->buffer_phys_addr);
 
 	/* Initialize each entry in the buffer descriptor table such that the physical address	
@@ -549,8 +603,8 @@ static int dma_proxy_probe(struct platform_device *pdev)
 	struct dma_proxy *lp;
 	struct device *dev = &pdev->dev;
 
-	printk(KERN_INFO "dma_proxy module initialized\n");
-	
+        printk(KERN_INFO "dma_proxy module initialized (bsize: %d bcount: %d)\n", BUFFER_SIZE, BUFFER_COUNT);
+
 	lp = (struct dma_proxy *) devm_kmalloc(&pdev->dev, sizeof(struct dma_proxy), GFP_KERNEL);
 	if (!lp) {
 		dev_err(dev, "Cound not allocate proxy device\n");
@@ -634,6 +688,7 @@ static int dma_proxy_remove(struct platform_device *pdev)
 			lp->channels[i].channel_p->device->device_terminate_all(lp->channels[i].channel_p);
 			dma_release_channel(lp->channels[i].channel_p);
 		}
+
 	return 0;
 }
 

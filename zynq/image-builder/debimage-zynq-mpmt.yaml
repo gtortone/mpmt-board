@@ -30,7 +30,10 @@ actions:
 
   - action: apt
     packages:
+      - telnet
+      - screen
       - minicom
+      - nload
       - picocom
       - curl
       - haveged
@@ -76,6 +79,11 @@ actions:
       - stm32flash
       - i2c-tools
       - nfs-common
+      - libi2c-dev
+      - libmodbus-dev
+      - libmodbus5
+      - mtd-utils
+      - mbpoll
 
   - action: apt
     packages:
@@ -92,19 +100,39 @@ actions:
 
   - action: run
     chroot: true
-    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2
+    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pyModbusTCP psutil
 
   - action: overlay
     source: overlays/boot
     destination: /boot
 
+  - action: overlay
+    source: overlays/etc
+    destination: /etc
+
   - action: run
     chroot: true
     script: scripts/untar-modules.sh
+    
+  - action: run
+    chroot: true
+    script: scripts/install-mbusd.sh
+
+  - action: run
+    chroot: true
+    script: scripts/install-midas.sh
+
+  - action: overlay
+    source: overlays/midas
+    destination: /opt/midas
 
   - action: run
     chroot: true
     script: scripts/install-mpmt-board-cli.sh
+
+  - action: run
+    chroot: true
+    script: scripts/install-mpmt-board-midas.sh
 
   - action: run
     chroot: true
@@ -144,6 +172,10 @@ actions:
 
   - action: run
     chroot: true
+    command: systemctl enable mbusd@ttyPS2.service
+
+  - action: run
+    chroot: true
     command: echo "ttyPS0" >> /etc/securetty
 
   - action: run
@@ -152,7 +184,7 @@ actions:
 
   - action: image-partition
     imagename: {{ $image }}
-    imagesize: 1.5GB
+    imagesize: 3.0GB
     partitiontype: msdos
     mountpoints:
       - mountpoint: /
@@ -170,3 +202,5 @@ actions:
   - action: pack
     compression: none
     file: zynq-mpmt-debian11.tar
+
+
