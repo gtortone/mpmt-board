@@ -13,7 +13,7 @@ GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
 
 PACKAGE_EXCLUDE = "kernel-image-zimage-*"
 
-IMAGE_FSTYPES = "ext3 tar.gz cpio.gz"
+IMAGE_FSTYPES = "ext3 tar.gz cpio.gz cpio.gz.u-boot"
 
 IMAGE_INSTALL = "\
     packagegroup-core-boot \
@@ -29,6 +29,7 @@ IMAGE_INSTALL = "\
     linux-setup \
     xc3sprog \
     xvc-adaptive \
+    mtd-utils \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
