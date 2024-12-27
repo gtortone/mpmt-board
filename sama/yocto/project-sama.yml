@@ -1,0 +1,57 @@
+header:
+  version: 18
+
+machine: sama5d27-som1-ek-sd
+
+distro: poky-atmel
+
+repos:
+
+  poky:
+    url: https://git.yoctoproject.org/git/poky
+    commit: f636d6eed72091fc2672f78eb0f5bf319b3d390f
+    layers:
+      meta:
+      meta-poky:
+  
+  meta-arm:
+    url: git://git.yoctoproject.org/meta-arm
+    commit: 7088279c0ab00c7dabefdd4544951b4746b48476
+    layers:
+      meta-arm:
+      meta-arm-toolchain:
+
+  meta-atmel:
+    url: https://github.com/linux4sam/meta-atmel.git
+    commit: c0df57fb7f929f0ba78bf27dab097405f271b159
+
+  meta-openembedded:
+    url: git://git.openembedded.org/meta-openembedded
+    commit: b8d1a14f7f3b76457c36752202ea7ae5881b6654
+    layers:
+      meta-oe:
+      meta-networking:
+      meta-python:
+
+  meta-mpmt:
+    path: meta-mpmt
+
+local_conf_header:
+  meta-custom: |
+    PACKAGE_CLASSES ?= "package_ipk"
+    EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+    USER_CLASSES ?= "buildstats"
+    OE_TERMINAL = "screen"
+    PATCHRESOLVE = "noop"
+    CONF_VERSION = "2"
+    LICENSE_FLAGS_ACCEPTED += "commercial"
+    SYSVINIT_ENABLED_GETTYS = ""
+    INHERIT += "rm_work"
+    ENABLE_BINARY_LOCALE_GENERATION = "1"
+    GLIBC_SPLIT_LC_PACKAGES = "0"
+    GLIBC_GENERATE_LOCALES += "en_US.UTF-8"
+    IMAGE_LINGUAS += "en-us"
+
+target:
+  - sama-mpmt-image
+

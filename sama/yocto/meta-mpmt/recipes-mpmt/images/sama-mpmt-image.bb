@@ -11,9 +11,10 @@ MACHINE_FEATURES:remove = "alsa"
 IMAGE_LINGUAS = "en-us"
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
 
-PACKAGE_EXCLUDE = "kernel-image-zimage-*"
+IMAGE_FSTYPES = "ext3 tar.gz cpio.gz cpio.gz.u-boot wic"
+WKS_FILE = "sdimage-bootpart.wks"
 
-IMAGE_FSTYPES = "ext3 tar.gz cpio.gz cpio.gz.u-boot"
+IMAGE_BOOT_FILES = "zImage at91-sama5d27_som1_ek.dtb"
 
 IMAGE_INSTALL = "\
     packagegroup-core-boot \
@@ -30,6 +31,12 @@ IMAGE_INSTALL = "\
     xc3sprog \
     xvc-adaptive \
     mtd-utils \
+    openocd \
+    util-linux-sfdisk \
+    e2fsprogs-resize2fs \
+    netcat \
+    parted \
+    ntp \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 

@@ -1,0 +1,77 @@
+From 19ab01c2d8c8f09f4f81bdb1d97c59f40ed2707b Mon Sep 17 00:00:00 2001
+From: Gennaro Tortone <gennaro.tortone@na.infn.it>
+Date: Mon, 23 Dec 2024 10:59:18 +0000
+Subject: [PATCH] config for mPMT board
+
+---
+ configs/sama5d27_som1_ek_mmc_defconfig | 12 ++++++------
+ default-uEnv.txt                       |  9 +++++++++
+ 2 files changed, 15 insertions(+), 6 deletions(-)
+ create mode 100644 default-uEnv.txt
+
+diff --git a/configs/sama5d27_som1_ek_mmc_defconfig b/configs/sama5d27_som1_ek_mmc_defconfig
+index 30dbcb5891..4a411826a8 100644
+--- a/configs/sama5d27_som1_ek_mmc_defconfig
++++ b/configs/sama5d27_som1_ek_mmc_defconfig
+@@ -13,6 +13,7 @@ CONFIG_ENV_SIZE=0x4000
+ CONFIG_DM_GPIO=y
+ CONFIG_DEFAULT_DEVICE_TREE="at91-sama5d27_som1_ek"
+ CONFIG_OF_LIBFDT_OVERLAY=y
++CONFIG_DM_RESET=y
+ CONFIG_SYS_MONITOR_LEN=524288
+ CONFIG_DEBUG_UART_BASE=0xf8020000
+ CONFIG_DEBUG_UART_CLOCK=82000000
+@@ -23,16 +24,14 @@ CONFIG_ENV_VARS_UBOOT_CONFIG=y
+ CONFIG_FIT=y
+ CONFIG_SD_BOOT=y
+ CONFIG_BOOTDELAY=3
+-CONFIG_USE_BOOTARGS=y
+-CONFIG_BOOTARGS="console=ttyS0,115200 earlyprintk root=/dev/mmcblk0p2 rw rootwait"
+-CONFIG_USE_BOOTCOMMAND=y
+-CONFIG_BOOTCOMMAND="fatload mmc 0 0x22000000 at91-sama5d27_som1_ek.dtb; fatload mmc 0 0x23000000 zImage; bootz 0x23000000 - 0x22000000"
+ CONFIG_SYS_CBSIZE=256
+ CONFIG_SYS_PBSIZE=276
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_MISC_INIT_R=y
+ CONFIG_HUSH_PARSER=y
++CONFIG_SYS_PROMPT="SAMA> "
+ CONFIG_CMD_BOOTZ=y
++CONFIG_CMD_ENV_FLAGS=y
+ CONFIG_CMD_GPIO=y
+ CONFIG_CMD_I2C=y
+ # CONFIG_CMD_LOADS is not set
+@@ -47,8 +46,10 @@ CONFIG_HASH_VERIFY=y
+ CONFIG_CMD_EXT4=y
+ CONFIG_CMD_FAT=y
+ CONFIG_OF_CONTROL=y
+-CONFIG_ENV_IS_IN_FAT=y
++CONFIG_ENV_OVERWRITE=y
+ CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_USE_DEFAULT_ENV_FILE=y
++CONFIG_DEFAULT_ENV_FILE="default-uEnv.txt"
+ CONFIG_CLK=y
+ CONFIG_CLK_CCF=y
+ CONFIG_CLK_AT91=y
+@@ -76,7 +77,6 @@ CONFIG_SPI_FLASH_SST=y
+ CONFIG_MACB=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_AT91PIO4=y
+-CONFIG_DM_RESET=y
+ CONFIG_RESET_AT91=y
+ CONFIG_DM_SERIAL=y
+ CONFIG_DEBUG_UART_ANNOUNCE=y
+diff --git a/default-uEnv.txt b/default-uEnv.txt
+new file mode 100644
+index 0000000000..51a09ecba8
+--- /dev/null
++++ b/default-uEnv.txt
+@@ -0,0 +1,9 @@
++autoload=no
++bootdev=mmc
++bootcmd=dhcp; tftp 0x21000000 ${tftpdir}/uEnv.txt; if test -n ${fileaddr}; then env import -t 0x21000000; fi; run boot${bootdev}
++bootemmc=setenv mmcdev 0;run bootmmc
++bootmmc=setenv bootargs console=ttyS0,115200 earlyprintk root=/dev/mmcblk0p2 rw rootwait;mmc rescan;fatload mmc ${mmcdev}:1 0x21000000 at91-sama5d27_som1_ek.dtb;fatload mmc ${mmcdev}:1 0x21100000 zImage;bootz 0x21100000 - 0x21000000
++bootnet=dhcp;setenv bootargs console=ttyS0,115200 root=/dev/ram0;tftp 0x21000000 ${tftpdir}/at91-sama5d27_som1_ek.dtb;tftp 0x21100000 ${tftpdir}/zImage;tftp 0x21600000 ${tftpdir}/rootfs.cpio.gz;bootz 0x21100000 0x21600000 0x21000000
++bootsd=setenv mmcdev 1;run bootmmc
++mmcdev=0
++tftpdir=mpmt/sama

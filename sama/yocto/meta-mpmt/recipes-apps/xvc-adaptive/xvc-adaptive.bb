@@ -6,7 +6,7 @@ DEPENDS = "libusb-compat libftdi"
 RDEPENDS:${PN} = "libusb1 libftdi"
 
 SRC_URI = "git://github.com/gtortone/xvc-adaptive.git;protocol=http;branch=main"
-SRCREV = "a6d26fe2bf11f5270b3ed96c9408a36252460bcf"
+SRCREV = "2b188fe7fb423b6fff748b466173125f2a69f53e"
 
 S = "${WORKDIR}/git"
 

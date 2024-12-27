@@ -2,6 +2,13 @@
 sama/image-builder/*.img
 sama/image-builder/*.tar.gz
 sama/image-builder/*.bmap
+
+sama/yocto/meta-arm
+sama/yocto/meta-atmel
+sama/yocto/meta-openembedded
+sama/yocto/poky
+sama/yocto/build
+
 zynq/image-builder/*.img
 zynq/image-builder/*.tar.gz
 zynq/image-builder/*.tar
