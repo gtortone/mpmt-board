@@ -1,5 +1,41 @@
 /include/ "system-conf.dtsi"
 
+&qspi {
+ #address-cells = <1>;
+ #size-cells = <0>;
+
+ flash0: flash@0 {
+  compatible = "spansion,s25fl256s1";
+  spi-tx-bus-width = <1>;
+  spi-rx-bus-width = <4>;
+  spi-max-frequency = <10000000>;
+  reg = <0x0>;
+  #address-cells = <1>;
+  #size-cells = <1>;
+
+  partition@0x00000000 {
+   label = "boot";
+   reg = <0x00000000 0x00800000>;
+  };
+
+  partition@0x00800000 {
+   label = "bootenv";
+   reg = <0x00800000 0x00020000>;
+  };
+
+  partition@0x00820000 {
+   label = "kernel";
+   reg = <0x00820000 0x00a80000>;
+  };
+
+  partition@0x012a0000 {
+   label = "spare";
+   reg = <0x012a0000 0x00000000>;
+  };
+ };
+};
+
+
 &gem0 {
 	status = "okay";
    phy-handle = <&phy0>;
@@ -46,3 +82,5 @@ add it manually in device tree
       reg = <0x43d00000 0x10000>;
    };
 };
+
+
