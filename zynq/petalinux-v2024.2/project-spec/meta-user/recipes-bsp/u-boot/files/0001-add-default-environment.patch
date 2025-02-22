@@ -1,0 +1,34 @@
+From 3fcb7a7aa6c040265bee5701dc309bd82f7ba58d Mon Sep 17 00:00:00 2001
+From: Gennaro Tortone <gennaro.tortone@na.infn.it>
+Date: Fri, 21 Feb 2025 15:52:45 +0000
+Subject: [PATCH] add default environment
+
+Signed-off-by: Gennaro Tortone <gennaro.tortone@na.infn.it>
+---
+ default-uEnv.txt | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+ create mode 100644 default-uEnv.txt
+
+diff --git a/default-uEnv.txt b/default-uEnv.txt
+new file mode 100644
+index 0000000000..eb024f7900
+--- /dev/null
++++ b/default-uEnv.txt
+@@ -0,0 +1,16 @@
++autoload=no
++nc=setenv stdout nc;setenv stdin nc
++bootdelay=5
++preboot=run readmac buildmac
++ethprime=ethernet@e000b000
++readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
++buildmac=setenv e "" ; setenv sep \"\"; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; setenv e \"$e$sep$b\" ; setenv sep : ; done && env set ethaddr $e && echo == MAC address set to $ethaddr from eeprom
++bootargs=earlyprintk earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio
++devicetree_load_address=0x2000000
++kernel_load_address=0x2080000
++initrd_load_address=0x5000000
++bootnet=dhcp && tftpboot ${kernel_load_address} /mpmt/zynq/zImage && tftpboot ${devicetree_load_address} /mpmt/zynq/system.dtb && tftpboot ${initrd_load_address} /mpmt/zynq/rootfs.cpio.gz && bootz ${kernel_load_address} ${initrd_load_address} ${devicetree_load_address}
++bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}
++bootmedia=mmc
++bootcmd=run boot${bootmedia}
++flash_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 0 && sf erase 0 0x1000000 && sf write 0x09000000 0 ${filesize}
++verify_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 0 && sf read 0xA000000 0 ${filesize} && cmp.b 0x09000000 0xA000000 ${filesize}
