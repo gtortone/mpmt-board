@@ -1,5 +1,11 @@
 /include/ "system-conf.dtsi"
 
+&amba {
+  ptm@f889d000 {
+    cpu = <&cpu0>;
+  };
+};
+
 &qspi {
  #address-cells = <1>;
  #size-cells = <0>;
