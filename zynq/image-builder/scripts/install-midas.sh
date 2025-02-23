@@ -18,4 +18,4 @@ make -j
 make install
 
 # install Python modules
-pip3 install -e /opt/packages/midas/python --user 
+pip3 install -e /opt/packages/midas/python --user --break-system-packages

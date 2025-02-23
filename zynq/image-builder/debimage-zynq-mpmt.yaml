@@ -1,11 +1,11 @@
-{{- $image := or .image "debian11.img" -}}
+{{- $image := or .image "debian12.img" -}}
 
 architecture: armhf
 
 actions:
 
   - action: debootstrap
-    suite: "bullseye"
+    suite: "bookworm"
     components:
       - main
     mirror: https://deb.debian.org/debian
@@ -30,6 +30,7 @@ actions:
 
   - action: apt
     packages:
+      - systemd-timesyncd
       - telnet
       - screen
       - minicom
@@ -51,8 +52,8 @@ actions:
       - kmod 
       - vim
       - file
-      - resolvconf
       - iperf3
+      - systemd-resolved
 
   - action: apt
     packages:
@@ -70,7 +71,6 @@ actions:
       - python3-pip
       - make 
       - pkg-config 
-      - ntp 
       - libusb-dev 
       - cmake 
       - zlib1g 
@@ -89,7 +89,7 @@ actions:
     packages:
       - python3-numpy
       - python3-dev
-      - libfmt7
+      - libfmt9
       - libfmt-dev
       - libboost-iostreams1.74.0
       - libboost-iostreams1.74-dev
@@ -100,7 +100,7 @@ actions:
 
   - action: run
     chroot: true
-    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pymodbus==3.7.4 psutil
+    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pymodbus==3.7.4 psutil --break-system-packages
 
   - action: overlay
     source: overlays/boot
@@ -172,7 +172,7 @@ actions:
 
   - action: run
     chroot: true
-    command: systemctl enable mbusd@ttyPS2.service
+    command: systemctl enable mbusd@ttyPS1.service
 
   - action: run
     chroot: true
@@ -201,6 +201,6 @@ actions:
 
   - action: pack
     compression: none
-    file: zynq-mpmt-debian11.tar
+    file: zynq-mpmt-debian12.tar
 
 

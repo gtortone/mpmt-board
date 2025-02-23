@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBIAN_RELEASE=11
+DEBIAN_RELEASE=12
 PL_PROJECT_BASE=~/devel/HyperK/PROD-ZYNQ7/petalinux/pl-mpmt/images/linux
 TMPDIR=$PL_PROJECT_BASE/tmp
 
