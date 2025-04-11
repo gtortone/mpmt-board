@@ -133,8 +133,6 @@ MODULE_LICENSE("GPL");
  * Note that this test requires a transmit and receive channel to function and uses the first
  * transmit and receive channnels when multiple channels exist.
  */
-static unsigned internal_test = 0;
-module_param(internal_test, int, S_IRUGO);
 
 /* The following data structures represent a single channel of DMA, transmit or receive in the case
  * when using AXI DMA.  It contains all the data to be maintained for the channel.
@@ -243,7 +241,7 @@ static void start_transfer(struct dma_proxy_channel *pchannel_p)
 	struct dma_device *dma_device = pchannel_p->channel_p->device;
 	int bdindex = pchannel_p->bdindex;
 
-        /* Make sure the transferred bytes fields are intializaed properly */
+        /* Make sure the transferred bytes fields are intialized properly */
         pchannel_p->buffer_table_p[bdindex].transferred_length = 0;
 
 	/* A single entry scatter gather list is used as it's not clear how to do it with a simpler method.
@@ -304,68 +302,8 @@ static void wait_for_transfer(struct dma_proxy_channel *pchannel_p)
 
         struct proxy_bd *bd = &pchannel_p->bdtable[bdindex];
         pchannel_p->buffer_table_p[bdindex].transferred_length = (0x7FFFFF & bd->status); /* lower 23 bits*/
-        /*
-          printk("%s: Post transfer descriptor buf_addr=0x%08x control=0x%08x status=0x%08x, xfer length=%u", __func__, bd->buf_addr, bd->control, bd->status, pchannel_p->buffer_table_p[bdindex].transferred_length);
-        */
+          /* printk("%s: Post transfer descriptor buf_addr=0x%08x control=0x%08x status=0x%08x, xfer length=%u", __func__, bd->buf_addr, bd->control, bd->status, pchannel_p->buffer_table_p[bdindex].transferred_length); */
 
-}
-
-/* The following functions are designed to test the driver from within the device
- * driver without any user space. It uses the first channel buffer for the transmit and receive.
- * If this works but the user application does not then the user application is at fault.
- */
-static void tx_test(struct work_struct *local_work)
-{
-	struct dma_proxy *lp;
-	lp = container_of(local_work, struct dma_proxy, work);
-
-	/* Use the 1st buffer for the test
-	 */
-	lp->channels[TX_CHANNEL].buffer_table_p[0].length = TEST_SIZE;
-	lp->channels[TX_CHANNEL].bdindex = 0;
-
-	start_transfer(&lp->channels[TX_CHANNEL]);
-	wait_for_transfer(&lp->channels[TX_CHANNEL]);
-}
-
-static void test(struct dma_proxy *lp)
-{
-	int i;
-
-	printk("Starting internal test\n");
-
-	/* Initialize the buffers for the test
-	 */
-	for (i = 0; i < TEST_SIZE / sizeof(unsigned int); i++) {
-		lp->channels[TX_CHANNEL].buffer_table_p[0].buffer[i] = i;
-		lp->channels[RX_CHANNEL].buffer_table_p[0].buffer[i] = 0;
-	}
-
-	/* Since the transfer function is blocking the transmit channel is started from a worker
-	 * thread
-	 */
-	INIT_WORK(&lp->work, tx_test);
-	schedule_work(&lp->work);
-
-	/* Receive the data that was just sent and looped back
-	 */
-	lp->channels[RX_CHANNEL].buffer_table_p->length = TEST_SIZE;
-	lp->channels[TX_CHANNEL].bdindex = 0;
-
-	start_transfer(&lp->channels[RX_CHANNEL]);
-	wait_for_transfer(&lp->channels[RX_CHANNEL]);
-
-	/* Verify the receiver buffer matches the transmit buffer to
-	 * verify the transfer was good
-	 */
-	for (i = 0; i < TEST_SIZE / sizeof(unsigned int); i++)
-		if (lp->channels[TX_CHANNEL].buffer_table_p[0].buffer[i] !=
-			lp->channels[RX_CHANNEL].buffer_table_p[0].buffer[i]) {
-			printk("buffers not equal, first index = %d\n", i);
-			break;
-		}
-
-	printk("Internal test complete\n");
 }
 
 /* Map the memory for the channel interface into user space such that user space can
@@ -404,7 +342,7 @@ static int release(struct inode *ino, struct file *file)
 	 * This is not working and causes an issue that may need investigation in the 
 	 * DMA driver at the lower level.
 	 */
-	//dmaengine_terminate_sync(pchannel_p->channel_p);
+	dmaengine_terminate_sync(pchannel_p->channel_p);
 
 	return 0;
 }
@@ -551,12 +489,12 @@ static int create_channel(struct platform_device *pdev, struct dma_proxy_channel
 	/* Request the DMA channel from the DMA engine and then use the device from
 	 * the channel for the proxy channel also.
 	 */
-	//pchannel_p->channel_p = dma_request_slave_channel(&pdev->dev, name);
 	pchannel_p->channel_p = dma_request_chan(&pdev->dev, name);
 	if (!pchannel_p->channel_p) {
 		dev_err(pchannel_p->dma_device_p, "DMA channel request error\n");
 		return ERROR;
 	}
+
 	pchannel_p->dma_device_p = &pdev->dev; 
 
 	/* Initialize the character device for the dma proxy channel
@@ -655,8 +593,6 @@ static int dma_proxy_probe(struct platform_device *pdev)
 		total_count++;
 	}
 
-	if (internal_test)
-		test(lp);
 	return 0;
 }
  

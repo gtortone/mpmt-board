@@ -182,6 +182,10 @@ actions:
     chroot: true
     command: echo 'root:$1$TzpfaNEc$tjqCamkIJFUytJokydS8w.' | /usr/sbin/chpasswd -e
 
+  - action: run
+    chroot: true
+    command: ln -s /dev/null /etc/systemd/network/99-default.link
+
   - action: image-partition
     imagename: {{ $image }}
     imagesize: 3.0GB
