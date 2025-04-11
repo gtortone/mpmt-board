@@ -37,6 +37,7 @@ IMAGE_INSTALL = "\
     netcat \
     parted \
     ntp \
+    iperf3 \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
