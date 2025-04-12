@@ -335,14 +335,14 @@ static int local_open(struct inode *ino, struct file *file)
 static int release(struct inode *ino, struct file *file)
 {
 	struct dma_proxy_channel *pchannel_p = (struct dma_proxy_channel *)file->private_data;
-	struct dma_device *dma_device = pchannel_p->channel_p->device;
 
 	/* Stop all the activity when the channel is closed assuming this
 	 * may help if the application is aborted without normal closure
 	 * This is not working and causes an issue that may need investigation in the 
 	 * DMA driver at the lower level.
 	 */
-	dmaengine_terminate_sync(pchannel_p->channel_p);
+
+	//printk(KERN_INFO "release file\n");
 
 	return 0;
 }
@@ -355,7 +355,6 @@ static int release(struct inode *ino, struct file *file)
 static long ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct dma_proxy_channel *pchannel_p = (struct dma_proxy_channel *)file->private_data;
-	dma_addr_t test;
 
 	/* Get the bd index from the input argument as all commands require it
 	 */
@@ -604,6 +603,9 @@ static int dma_proxy_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct dma_proxy *lp = dev_get_drvdata(dev);
 
+	//dmaengine_terminate_all(pchannel_p->channel_p);
+	//dma_release_channel(pchannel_p->channel_p);
+
 	printk(KERN_INFO "dma_proxy module exited\n");
 
 	/* Take care of the char device infrastructure for each
@@ -611,6 +613,10 @@ static int dma_proxy_remove(struct platform_device *pdev)
 	 * channel seperately.
 	 */
 	for (i = 0; i < lp->channel_count; i++) { 
+
+		dmaengine_terminate_all(lp->channels[i].channel_p);
+		dma_release_channel(lp->channels[i].channel_p);
+
 		if (lp->channels[i].proxy_device_p)
 			cdevice_exit(&lp->channels[i]);
 		total_count--;
