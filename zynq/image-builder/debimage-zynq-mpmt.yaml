@@ -140,6 +140,10 @@ actions:
 
   - action: run
     chroot: true
+    script: scripts/install-mpmt-readout.sh
+
+  - action: run
+    chroot: true
     script: scripts/install-tooldaq.sh
 
   - action: run
