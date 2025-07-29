@@ -100,7 +100,7 @@ actions:
 
   - action: run
     chroot: true
-    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pymodbus==3.7.4 psutil --break-system-packages
+    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pymodbus==3.9.2 psutil --break-system-packages
 
   - action: overlay
     source: overlays/boot
