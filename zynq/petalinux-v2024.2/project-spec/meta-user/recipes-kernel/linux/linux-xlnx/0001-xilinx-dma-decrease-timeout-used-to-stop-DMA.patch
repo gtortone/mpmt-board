@@ -1,0 +1,29 @@
+From 823e81ccf05614f10d0480871843891621506cbd Mon Sep 17 00:00:00 2001
+From: Gennaro Tortone <gennaro.tortone@na.infn.it>
+Date: Mon, 15 Sep 2025 12:24:29 +0000
+Subject: [PATCH] xilinx-dma: decrease timeout used to stop DMA
+
+Signed-off-by: Gennaro Tortone <gennaro.tortone@na.infn.it>
+---
+ drivers/dma/xilinx/xilinx_dma.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/dma/xilinx/xilinx_dma.c b/drivers/dma/xilinx/xilinx_dma.c
+index 0a3b2e22f23d..3316fde1ee0e 100644
+--- a/drivers/dma/xilinx/xilinx_dma.c
++++ b/drivers/dma/xilinx/xilinx_dma.c
+@@ -1309,9 +1309,14 @@ static int xilinx_dma_stop_transfer(struct xilinx_dma_chan *chan)
+ 	dma_ctrl_clr(chan, XILINX_DMA_REG_DMACR, XILINX_DMA_DMACR_RUNSTOP);
+ 
+ 	/* Wait for the hardware to halt */
++   /*
+ 	return xilinx_dma_poll_timeout(chan, XILINX_DMA_REG_DMASR, val,
+ 				       val & XILINX_DMA_DMASR_HALTED, 0,
+ 				       XILINX_DMA_LOOP_COUNT);
++   */
++	return xilinx_dma_poll_timeout(chan, XILINX_DMA_REG_DMASR, val,
++				       val & XILINX_DMA_DMASR_HALTED, 0,
++				       1000);
+ }
+ 
+ /**

@@ -285,13 +285,22 @@ static void wait_for_transfer(struct dma_proxy_channel *pchannel_p)
 {
 	enum dma_status status;
 	int bdindex = pchannel_p->bdindex;
+	unsigned long timeout;
 
 	pchannel_p->buffer_table_p[bdindex].status = PROXY_BUSY;
 
 	/* Wait for the transaction to complete, or timeout, or get an error
 	 */
-	wait_for_completion(&pchannel_p->bdtable[bdindex].cmp);
+	//wait_for_completion(&pchannel_p->bdtable[bdindex].cmp);
+	timeout = wait_for_completion_timeout(&pchannel_p->bdtable[bdindex].cmp, msecs_to_jiffies(100));
+
 	status = dma_async_is_tx_complete(pchannel_p->channel_p, pchannel_p->bdtable[bdindex].cookie, NULL, NULL);
+
+	if(timeout == 0) {
+	   pchannel_p->buffer_table_p[bdindex].status = PROXY_TIMEOUT;
+	   return;
+	   //printk(KERN_ERR "DMA timed out\n");
+	}
 
 	if (status != DMA_COMPLETE) {
 		pchannel_p->buffer_table_p[bdindex].status = PROXY_ERROR;
@@ -302,7 +311,7 @@ static void wait_for_transfer(struct dma_proxy_channel *pchannel_p)
 
         struct proxy_bd *bd = &pchannel_p->bdtable[bdindex];
         pchannel_p->buffer_table_p[bdindex].transferred_length = (0x7FFFFF & bd->status); /* lower 23 bits*/
-          /* printk("%s: Post transfer descriptor buf_addr=0x%08x control=0x%08x status=0x%08x, xfer length=%u", __func__, bd->buf_addr, bd->control, bd->status, pchannel_p->buffer_table_p[bdindex].transferred_length); */
+        /* printk("%s: Post transfer descriptor buf_addr=0x%08x control=0x%08x status=0x%08x, xfer length=%u", __func__, bd->buf_addr, bd->control, bd->status, pchannel_p->buffer_table_p[bdindex].transferred_length); */
 
 }
 
@@ -603,24 +612,23 @@ static int dma_proxy_remove(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct dma_proxy *lp = dev_get_drvdata(dev);
 
-	//dmaengine_terminate_all(pchannel_p->channel_p);
-	//dma_release_channel(pchannel_p->channel_p);
-
-	printk(KERN_INFO "dma_proxy module exited\n");
-
 	/* Take care of the char device infrastructure for each
 	 * channel except for the last channel. Handle the last
 	 * channel seperately.
 	 */
 	for (i = 0; i < lp->channel_count; i++) { 
 
-		dmaengine_terminate_all(lp->channels[i].channel_p);
+		dmaengine_terminate_async(lp->channels[i].channel_p);
+		dmaengine_synchronize(lp->channels[i].channel_p);
 		dma_release_channel(lp->channels[i].channel_p);
 
 		if (lp->channels[i].proxy_device_p)
 			cdevice_exit(&lp->channels[i]);
+
 		total_count--;
 	}
+
+	printk(KERN_INFO "dma_proxy module exited\n");
 
 	return 0;
 }
