@@ -100,7 +100,7 @@ actions:
 
   - action: run
     chroot: true
-    command: pip3 install minimalmodbus cmd2==2.2.0 smbus2 pymodbus==3.9.2 psutil --break-system-packages
+    command: pip3 install minimalmodbus cmd2==2.7.0 colorama smbus2 pymodbus==3.9.2 psutil --break-system-packages
 
   - action: overlay
     source: overlays/boot
@@ -118,21 +118,21 @@ actions:
     chroot: true
     script: scripts/install-mbusd.sh
 
-  - action: run
-    chroot: true
-    script: scripts/install-midas.sh
+  #- action: run
+  #  chroot: true
+  #  script: scripts/install-midas.sh
 
-  - action: overlay
-    source: overlays/midas
-    destination: /opt/midas
+  #- action: overlay
+  #  source: overlays/midas
+  #  destination: /opt/midas
 
   - action: run
     chroot: true
     script: scripts/install-mpmt-board-cli.sh
 
-  - action: run
-    chroot: true
-    script: scripts/install-mpmt-board-midas.sh
+  #- action: run
+  #  chroot: true
+  #  script: scripts/install-mpmt-board-midas.sh
 
   - action: run
     chroot: true
@@ -169,6 +169,10 @@ actions:
   - action: overlay
     source: overlays/rc
     destination: /etc
+
+  - action: overlay
+    source: overlays/scripts
+    destination: /usr/bin
 
   - action: run
     chroot: true
