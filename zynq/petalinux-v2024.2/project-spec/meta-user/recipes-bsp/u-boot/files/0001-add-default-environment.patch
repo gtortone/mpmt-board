@@ -14,21 +14,27 @@ new file mode 100644
 index 0000000000..eb024f7900
 --- /dev/null
 +++ b/default-uEnv.txt
-@@ -0,0 +1,16 @@
-+autoload=no
-+nc=setenv stdout nc;setenv stdin nc
-+bootdelay=5
-+preboot=run readmac buildmac
+@@ -0,0 +1,23 @@
 +ethprime=ethernet@e000b000
-+readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
-+buildmac=setenv e "" ; setenv sep \"\"; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; setenv e \"$e$sep$b\" ; setenv sep : ; done && env set ethaddr $e && echo == MAC address set to $ethaddr from eeprom
-+bootargs=earlyprintk earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio net.ifnames=0
 +devicetree_load_address=0x2000000
 +kernel_load_address=0x2080000
 +initrd_load_address=0x5000000
-+bootnet=dhcp && tftpboot ${kernel_load_address} /mpmt/zynq/zImage && tftpboot ${devicetree_load_address} /mpmt/zynq/system.dtb && tftpboot ${initrd_load_address} /mpmt/zynq/rootfs.cpio.gz && bootz ${kernel_load_address} ${initrd_load_address} ${devicetree_load_address}
-+bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}
++load_address=0x09000000
++autoload=no
++bootdelay=5
 +bootmedia=mmc
++nc=setenv stdout nc;setenv stdin nc
++mtdparts=mtdparts=nor0:0x6B0000@0(bootbin),0x1920000@0x6C0000(fitimage),0x10000@0x1FF0000(user)
++get_ip=dhcp ; while itest $? != 0; do dhcp; done
++preboot=sf probe 0 0 ; run readmac buildmac ; env import ${load_address} ; if test -n "$mpmtsn"; then setenv bootargs ${bootargs} mpmtsn=${mpmtsn}; fi ; if test -n "$tasklist"; then setenv bootargs ${bootargs} tasklist=${tasklist}; fi ; if test -n "$autoexec"; then run autoexec; fi
++readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
++buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; if itest.b ${b} <= 0xF; then setenv b 0${b}; fi ; setenv e "$e$sep$b" ; setenv sep : ; done && env set ethaddr $e && setexpr ethaddr_dir gsub : - ${ethaddr} && echo == MAC address set to $ethaddr from eeprom ; 
++tftphome=/mpmt/zynq/default
++bootargs=earlyprintk earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio net.ifnames=0
++bootqspi=sf probe 0 0 && mtd read fitimage ${load_address} ; bootm ${load_address}
++bootnet=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/image.ub && bootm ${load_address}
++bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}
 +bootcmd=run boot${bootmedia}
-+flash_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 0 && sf erase 0 0x1000000 && sf write 0x09000000 0 ${filesize}
-+verify_bootbin=tftpboot 0x09000000 mpmt/zynq/BOOT.BIN && sf probe 0 0 && sf read 0xA000000 0 ${filesize} && cmp.b 0x09000000 0xA000000 ${filesize}
++flash_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/BOOT.BIN && mtd erase bootbin && mtd write bootbin ${load_address}
++flash_fitimage=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/image.ub && mtd erase fitimage && mtd write fitimage ${load_address}
++verify_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/BOOT.BIN && mtd read bootbin 0xA000000 0 ${filesize} && cmp.b ${load_address} 0xA000000 ${filesize}
