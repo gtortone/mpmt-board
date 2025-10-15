@@ -6,3 +6,6 @@ CONFIG_peekpoke
 CONFIG_dma-proxy
 CONFIG_dhcpcd
 CONFIG_u-boot-fw-utils
+CONFIG_atftp
+CONFIG_pv
+CONFIG_bash
