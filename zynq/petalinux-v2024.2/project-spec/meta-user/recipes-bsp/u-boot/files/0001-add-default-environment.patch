@@ -14,7 +14,7 @@ new file mode 100644
 index 0000000000..eb024f7900
 --- /dev/null
 +++ b/default-uEnv.txt
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,25 @@
 +ethprime=ethernet@e000b000
 +devicetree_load_address=0x2000000
 +kernel_load_address=0x2080000
@@ -23,18 +23,20 @@ index 0000000000..eb024f7900
 +autoload=no
 +bootdelay=5
 +bootmedia=mmc
++bootcmd=run boot${bootmedia}
 +nc=setenv stdout nc;setenv stdin nc
-+mtdparts=mtdparts=nor0:0x6B0000@0(bootbin),0x1920000@0x6C0000(fitimage),0x10000@0x1FF0000(user)
-+get_ip=dhcp ; while itest $? != 0; do dhcp; done
-+preboot=sf probe 0 0 ; run readmac buildmac ; env import ${load_address} ; if test -n "$mpmtsn"; then setenv bootargs ${bootargs} mpmtsn=${mpmtsn}; fi ; if test -n "$tasklist"; then setenv bootargs ${bootargs} tasklist=${tasklist}; fi ; if test -n "$autoexec"; then run autoexec; fi
 +readmac=i2c dev 0; i2c read 50 FA.1 6 0xFFFFFC00
-+buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; if itest.b ${b} <= 0xF; then setenv b 0${b}; fi ; setenv e "$e$sep$b" ; setenv sep : ; done && env set ethaddr $e && setexpr ethaddr_dir gsub : - ${ethaddr} && echo == MAC address set to $ethaddr from eeprom ; 
-+tftphome=/mpmt/zynq/default
++mtdparts=mtdparts=nor0:0x6B0000@0(bootbin),0x1920000@0x6C0000(fitimage),0x10000@0x1FF0000(user)
++get_ip=dhcp ; while itest $? != 0; do dhcp; done ; if test -n "$serverip"; then setenv bootargs ${bootargs} serverip=${serverip}; fi ; 
++preboot=sf probe 0 0 ; run readmac buildmac ; env import ${load_address} ; if test -n "$mpmtsn"; then setenv bootargs ${bootargs} mpmtsn=${mpmtsn}; fi ; if test -n "$mpmttype"; then setenv bootargs ${bootargs} mpmttype=${mpmttype}; fi ; if test -n "$tasklist"; then setenv bootargs ${bootargs} tasklist=${tasklist}; fi ; if test "$bootmode" = "recovery" ; then run bootnet  ; fi ; if test -n "$autoexec"; then run autoexec; fi
++buildmac=setenv e "" ; setenv sep ""; for i in 0 1 2 3 4 5 ; do setexpr x 0xFFFFFC00 + $i ; setexpr.b b *$x ; if itest.b ${b} <= 0xF; then setenv b 0${b}; fi ; setenv e "$e$sep$b" ; setenv sep : ; done && env set ethaddr $e && setexpr ethaddr_str gsub : - ${ethaddr} && echo == MAC address set to $ethaddr from eeprom ; 
++tftphome=/mpmt/zynq
 +bootargs=earlyprintk earlycon clk_ignore_unused cpuidle.off=1 uio_pdrv_genirq.of_id=generic-uio net.ifnames=0
 +bootqspi=sf probe 0 0 && mtd read fitimage ${load_address} ; bootm ${load_address}
-+bootnet=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/image.ub && bootm ${load_address}
++bootnet=if test -z "$ipaddr"; then run get_ip; fi ; run download_fitimage && bootm ${load_address}
 +bootmmc=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 rw rootwait cma=320M && load mmc 0 ${kernel_load_address} /boot/zImage && load mmc 0 ${devicetree_load_address} /boot/system.dtb && bootz ${kernel_load_address} - ${devicetree_load_address}
-+bootcmd=run boot${bootmedia}
-+flash_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/BOOT.BIN && mtd erase bootbin && mtd write bootbin ${load_address}
-+flash_fitimage=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/image.ub && mtd erase fitimage && mtd write fitimage ${load_address}
-+verify_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; tftpboot ${load_address} ${tftphome}/BOOT.BIN && mtd read bootbin 0xA000000 0 ${filesize} && cmp.b ${load_address} 0xA000000 ${filesize}
++download_bootbin=tftpboot ${load_address} ${tftphome}/${ethaddr_str}/BOOT.BIN || tftpboot ${load_address} ${tftphome}/default/${mpmttype}/BOOT.BIN || tftpboot ${load_address} ${tftphome}/default/BOOT.BIN
++download_fitimage=tftpboot ${load_address} ${tftphome}/${ethaddr_str}/image.ub || tftpboot ${load_address} ${tftphome}/default/${mpmttype}/image.ub || tftpboot ${load_address} ${tftphome}/default/image.ub
++flash_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; run download_bootbin && mtd erase bootbin && mtd write bootbin ${load_address}
++flash_fitimage=if test -z "$ipaddr"; then run get_ip; fi ; run download_fitimage && mtd erase fitimage && mtd write fitimage ${load_address}
++verify_bootbin=if test -z "$ipaddr"; then run get_ip; fi ; run download_bootbin && mtd read bootbin 0xA000000 0 ${filesize} && cmp.b ${load_address} 0xA000000 ${filesize}
