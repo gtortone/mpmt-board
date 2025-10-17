@@ -1,4 +1,4 @@
-{{- $image := or .image "debian12.img" -}}
+{{- $image := or .image "debian.img" -}}
 
 architecture: armhf
 
@@ -84,6 +84,7 @@ actions:
       - libmodbus5
       - mtd-utils
       - mbpoll
+      - libubootenv-tool
 
   - action: apt
     packages:
@@ -209,6 +210,5 @@ actions:
 
   - action: pack
     compression: none
-    file: zynq-mpmt-debian12.tar
-
+    file: zynq-mpmt-debian.tar
 

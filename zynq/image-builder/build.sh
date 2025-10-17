@@ -11,10 +11,14 @@ tar -C $TMPDIR -czf overlays/boot/modules.tar.gz lib
 rm -rf $TMPDIR
 
 echo "copy PetaLinux files..."
-cp $PL_PROJECT_BASE/zImage overlays/boot
-cp $PL_PROJECT_BASE/system.dtb overlays/boot
+#cp $PL_PROJECT_BASE/zImage overlays/boot
+#cp $PL_PROJECT_BASE/system.dtb overlays/boot
+cp $PL_PROJECT_BASE/image.ub overlays/boot
 
 echo "start Linux image build..."
-sudo debos -t image:zynq-mpmt-debian$DEBIAN_RELEASE.img --cpus=8 --disable-fakemachine debimage-zynq-mpmt.yaml
+sudo debos -t image:zynq-mpmt-debian.img --cpus=8 --disable-fakemachine debimage-zynq-mpmt.yaml
 
 sudo losetup -D
+
+lz4 --favor-decSpeed zynq-mpmt-debian.tar
+gzip -k zynq-mpmt-debian.tar
