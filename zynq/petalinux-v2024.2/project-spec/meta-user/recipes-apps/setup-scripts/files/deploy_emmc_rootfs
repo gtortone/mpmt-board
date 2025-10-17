@@ -1,0 +1,139 @@
+#!/bin/sh
+
+dir=$(dirname -- "$(readlink -f -- "$0")")
+source $dir/functions.sh
+prog=`basename $0`
+
+usage() {
+   echo -e "\n$prog\n"
+   echo "   -p <protocol>   download protocol {tftp|http}              (mandatory)"
+   echo "   -r <filename>   rootfs file (.tar.gz | .tar.lz4 | .tar)    (mandatory)"
+   echo "   -c <filename>   configuration file                         (optional)"
+   echo -e "\n"
+}
+
+abort() {
+   echo -e "\n>>> TASK ABORT >>> deploy_emmc_rootfs\n"
+   exit 1
+}
+
+while getopts ":hc:p:r:" option; do
+   case $option in
+      h)
+         usage
+         exit
+         ;;
+      p)
+         protocol=$OPTARG
+         ;;
+      c)
+         cfgfile=$OPTARG
+         ;;
+      r)
+         tarfile=$OPTARG
+         ;;
+      \?)
+         echo "invalid option"
+         usage
+         exit;;
+   esac
+done
+
+if [ -z ${protocol} ]; then
+   echo "E: missing protocol"
+   usage
+   exit
+fi
+
+if [ -z ${tarfile} ]; then
+   echo "E: missing rootfs file"
+   usage
+   exit
+fi
+
+if [ "$protocol" != "tftp" ] && [ "$protocol" != "http" ]; then
+   echo "E: wrong protocol ($protocol)"
+   usage
+   exit
+fi
+
+if [ ! -z ${cfgfile} ]; then
+   echo "I: using $cfgfile configuration file"
+   set_cfgfile_environment $protocol $cfgfile
+else
+   set_cmdline_environment $protocol
+fi
+
+echo -e "\n>>> TASK START >>> deploy_emmc_rootfs\n"
+
+umount /dev/mmcblk0p1 2>/dev/null
+
+echo "I: setup eMMC partitions"
+sfdisk --delete /dev/mmcblk0
+echo ",,83,*" | sfdisk /dev/mmcblk0
+umount /dev/mmcblk0p1 2>/dev/null
+
+echo "I: setup eMMC filesystem"
+mkfs.ext4 -F /dev/mmcblk0p1
+
+echo "I: mount eMMC to /target"
+mkdir /target ; mount /dev/mmcblk0p1 /target
+cd /target
+
+
+if [ "$protocol" = "tftp" ]; then
+   src_tarfile=$tarfile
+   dst_tarfile=`basename $tarfile`
+   prepare_file $src_tarfile /target/$dst_tarfile
+   if [ "$?" -eq "0" ]; then
+      echo "I: unpacking rootfs"
+      case "$dst_tarfile" in
+         *.tar.gz)
+            cmd="pv $dst_tarfile | tar xzfp - --warning=no-timestamp"
+            ;;
+         *.tar.lz4)
+            cmd="pv $dst_tarfile | tar xfp - --warning=no-timestamp -I lz4"
+            ;;
+         *.tar)
+            cmd="pv $dst_tarfile | tar xfp - --warning=no-timestamp"
+            ;;
+         *)
+            echo "E: filename $dst_tarfile not found or not supported"
+            abort
+            ;;
+      esac
+   else
+      echo "E: error downloading file $src_tarfile"
+      abort
+   fi
+else
+   echo "I: unpacking rootfs from $protocol://$host:$port$home/$tarfile"
+   case "$tarfile" in
+      *.tar.gz) 
+         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xzfp - --warning=no-timestamp"
+         ;;
+      *.tar.lz4)
+         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xfp - --warning=no-timestamp -I lz4"
+         ;;
+      *.tar)
+         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xfp - --warning=no-timestamp"
+         ;;
+      *)
+         echo "E: filename $tarfile not found or not supported"
+         abort
+         ;;
+   esac
+fi
+
+eval "$cmd"
+
+cd / 
+umount /target
+
+if [ "$?" -eq "0" ]; then
+   echo -e "\n>>> TASK FINISH >>> deploy_emmc_rootfs\n"
+   exit 0
+else
+   abort
+fi
+

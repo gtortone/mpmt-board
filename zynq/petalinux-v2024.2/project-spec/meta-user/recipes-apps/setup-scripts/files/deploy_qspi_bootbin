@@ -1,0 +1,76 @@
+#!/bin/sh
+
+dir=$(dirname -- "$(readlink -f -- "$0")")
+source $dir/functions.sh
+prog=`basename $0`
+
+filename=BOOT.BIN
+part=mtd:bootbin
+
+usage() {
+   echo -e "\n$prog\n"
+   echo "   -p <protocol>   download protocol {tftp|http}    (mandatory)"
+   echo "   -c <filename>   configuration file               (optional)"
+   echo -e "\n"
+}
+
+while getopts ":hc:p:" option; do
+   case $option in
+      h)
+         usage
+         exit
+         ;;
+      p)
+         protocol=$OPTARG
+         ;;
+      c)
+         cfgfile=$OPTARG
+         ;;
+      \?)
+         echo "invalid option"
+         usage
+         exit;;
+   esac
+done
+
+if [ -z ${protocol} ]; then
+   echo "E: missing protocol"
+   usage
+   exit
+fi
+
+if [ "$protocol" != "tftp" ] && [ "$protocol" != "http" ]; then
+   echo "E: wrong protocol ($protocol)"
+   usage
+   exit
+fi
+
+if [ ! -z ${cfgfile} ]; then
+   echo "I: using $cfgfile configuration file"
+   set_cfgfile_environment $protocol $cfgfile
+else
+   set_cmdline_environment $protocol
+fi
+
+echo -e "\n>>> TASK START >>> $prog\n"
+
+prepare_file $filename /tmp/$filename
+
+if [ "$?" -eq "0" ]; then
+   flash /tmp/$filename $part
+   res=$?
+   rm /tmp/$filename
+   if [ "$res" -eq "0" ]; then
+      echo "I: image flashed successfully"
+      echo -e "\n>>> TASK FINISH >>> $prog\n"
+      exit 0
+   else
+      echo "E: image flashing failed"
+      echo -e "\n>>> TASK ABORT >>> $prog\n"
+      exit 1
+   fi
+else
+   echo -e "\n>>> TASK ABORT >>> $prog\n"
+   exit 1
+fi
+

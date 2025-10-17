@@ -1,11 +1,12 @@
 #Note: Mention Each package in individual line
 #These packages will get added into rootfs menu entry
 
-CONFIG_gpio-demo
-CONFIG_peekpoke
 CONFIG_dma-proxy
 CONFIG_dhcpcd
 CONFIG_u-boot-fw-utils
 CONFIG_atftp
 CONFIG_pv
 CONFIG_bash
+CONFIG_setup-scripts
+CONFIG_lz4
+

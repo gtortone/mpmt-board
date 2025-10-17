@@ -1,0 +1,14 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          run_tasks
+# Required-Start:    $local_fs
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: run installation tasks
+### END INIT INFO
+
+/opt/setup-scripts/run_tasks
+
+: exit 0

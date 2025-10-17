@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo -e "\n>>> TASK START >>> deploy_qspi_userdata\n"
+
+eval $(cat /proc/cmdline | grep -o '\bmpmtsn=[^ ]*')
+eval $(cat /proc/cmdline | grep -o '\bmpmttype=[^ ]*')
+
+if [[ -n "$mpmtsn" ]]; then
+   echo "I: flashing mPMT sn $mpmtsn to QSPI"
+   echo "mpmtsn=$mpmtsn" > /tmp/mpmtsn ; fw_setenv -s /tmp/mpmtsn ; rm /tmp/mpmtsn
+fi
+
+if [[ -n "$mpmttype" ]]; then
+   echo "I: flashing mPMT type $mpmttype to QSPI"
+   echo "mpmttype=$mpmttype" > /tmp/mpmttype ; fw_setenv -s /tmp/mpmttype ; rm /tmp/mpmttype
+fi
+
+echo -e "\n>>> TASK FINISH >>> deploy_qspi_userdata\n"
+
+exit

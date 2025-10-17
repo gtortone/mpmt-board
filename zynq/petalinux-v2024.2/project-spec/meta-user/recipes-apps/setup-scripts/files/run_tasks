@@ -1,0 +1,17 @@
+#!/bin/sh
+
+dir=$(dirname -- "$(readlink -f -- "$0")")
+
+echo -e "\n### TASKLIST START ###\n"
+
+eval $(cat /proc/cmdline | grep -o '\btasklist=.*' | sed 's/ /\\ /g')
+
+if [[ -z "$tasklist" ]]; then
+   echo "I: tasklist not available in /proc/cmdline"
+else
+   IFS=',' ; for t in $tasklist ; do
+      eval $dir/$t
+   done
+fi
+
+echo -e "\n### TASKLIST FINISH ###\n"
