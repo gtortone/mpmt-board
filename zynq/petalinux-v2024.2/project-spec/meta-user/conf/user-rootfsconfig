@@ -9,4 +9,4 @@ CONFIG_pv
 CONFIG_bash
 CONFIG_setup-scripts
 CONFIG_lz4
-
+CONFIG_ssh-host-keys
