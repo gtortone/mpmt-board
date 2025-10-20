@@ -28,6 +28,7 @@ IMAGE_INSTALL = "\
     libftdi \
     usbutils \
     linux-setup \
+    jtag-scripts \
     xc3sprog \
     xvc-adaptive \
     mtd-utils \
