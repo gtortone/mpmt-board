@@ -156,6 +156,10 @@ actions:
     destination: /etc/ssh
 
   - action: overlay
+    source: overlays/auth
+    destination: /root/.ssh
+
+  - action: overlay
     source: overlays/bash/bashrc
     destination: /root/.bashrc
 
