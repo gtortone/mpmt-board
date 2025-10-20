@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ "$1" = "stop" ]; then
+   exit 0
+fi
+
 dir=$(dirname -- "$(readlink -f -- "$0")")
 
 echo -e "\n### TASKLIST START ###\n"
