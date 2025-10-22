@@ -18,3 +18,4 @@ zynq/petalinux/project-spec/configs/config
 zynq/image-builder/overlays/boot
 ! zynq/image-builder/overlays/boot/placeholder
 
+mkdocs/venv/
