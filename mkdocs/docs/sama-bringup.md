@@ -6,7 +6,7 @@ To bring-up SAMA with a Linux operating system user will run SAM-BA to write boo
 
 ## SAM-BA
 
-SAM-BA tool is required to properly bring-up SAMA. SAM-BA software provides an open set of tools for in-system programming of internal and external memories connected to our 32-MCUs and MPUs.
+SAM-BA tool is required to properly bring-up SAMA. SAM-BA software provides an open set of tools for in-system programming of internal and external memories connected to 32bit MCUs and MPUs.
 
 SAM-BA is available on Microchip [website](https://www.microchip.com/en-us/development-tool/SAM-BA-In-system-Programmer).
 
@@ -36,6 +36,19 @@ Register `BSCR` contains the index of `BUREG` register to apply while `FUSE#16` 
 
 Default value of `FUSE#16` set QSPI flash as first boot device, this will be changed at the end of SAMA bring-up process.
 
+## Hardware preparation
+
+!!! warning
+    Be sure to follow these steps before start bring-up process otherwise SAM-BA tool will not communicate with SAMA board.
+
+1. connect USB cable on [JSAMA1](hardware.md#on-board-connectors) connector
+1. move [JT3](hardware.md#on-board-jumpers) jumper to position 1-2 (external eMMC enabled)
+1. move [JT4](hardware.md#on-board-jumpers) jumper to position 2-3 (QSPI disabled)
+1. power-on board
+1. move [JT4](hardware.md#on-board-jumpers) jumper to position 1-2 (QSPI enabled)
+
+After last step SAM-BA bootloader is listening for commands.
+
 ## QSPI setup
 
 Required files available from latest [mpmt-board release](https://github.com/gtortone/mpmt-board/releases/latest):
@@ -59,7 +72,7 @@ sam-ba -p usb -b sama5d27-som1-ek -a qspiflash -c write:u-boot.bin:0x00040000 -c
 
 ## eMMC setup
 
-Required rootfs file available from latest [mpmt-board release](https://github.com/gtortone/mpmt-board/releases/latest):
+Required rootfs file is available from latest [mpmt-board release](https://github.com/gtortone/mpmt-board/releases/latest):
 
 * [at91-sama5d27-rootfs.wic](https://github.com/gtortone/mpmt-board/releases/latest/download/at91-sama5d27-rootfs.wic)
 
@@ -138,7 +151,7 @@ xvcServer --driver FTDI --cfreq 15000000 --interface 2
 
 In order to boot Linux operating system from network some files (device tree, Linux kernel image and minimal root filesystem) are needed. U-Boot can fetch during network boot these files using TFTP protocol, so a deployment server is needed to use this feature.
 
-Connect a USB-UART adapter on [JDEB1](hardware.md#on-board-connectors), open serial console using a terminal emulation software and power-on the board. Interrupt U-Boot autoboot hitting a key after U-Boot banner and start network boot script:
+lonnect a USB-UART adapter on [JDEB1](hardware.md#on-board-connectors), open serial console using a terminal emulation software and power-on the board. Interrupt U-Boot autoboot hitting a key after U-Boot banner and start network boot script:
 
 ```shell
 run bootnet
