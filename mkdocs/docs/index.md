@@ -8,4 +8,4 @@ mPMT board includes several submodules and provides two embedded Linux boards:
 
 - a [Zynq](https://www.amd.com/en/products/adaptive-socs-and-fpgas/soc/zynq-7000.html) 7000 SoC that integrates the software programmability of an Arm-based processor with the hardware programmability of an FPGA dedicated for acquisition and slow control tasks.
 
-The main purpose of this documentation is to offer a guide to bring-up these two Linux systems (SAMA and ZYNQ).
+The main purpose of this documentation is to offer a guide to bring-up these two Linux systems (SAMA and Zynq).
