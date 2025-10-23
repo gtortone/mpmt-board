@@ -3,9 +3,6 @@ repo_url: https://github.com/gtortone/mpmt-board
 repo_name: gtortone/mpmt-board
 theme:
   name: material
-  font:
-    text: Merriweather Sans
-    code: Red Hat Mono
   palette:
     - scheme: slate
       toggle:
@@ -24,6 +21,11 @@ theme:
     - navigation.path
     - navigation.top
     - content.code.copy
+nav:
+  - 'index.md'
+  - 'hardware.md'
+  - 'deployment-server.md'
+  - 'sama-bringup.md'
 
 markdown_extensions:
   - pymdownx.blocks.caption
