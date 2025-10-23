@@ -108,4 +108,33 @@ for standard mPMT board (plain) or 'led equipped' mPMT board (led).
 
 * `/mpmt/zynq/default` contains boot files and/or configuration files common to all mPMT board types.
 
+## Configuration
+
+While SAMA installation is done using SAM-BA tool, Zynq installation is a quite complex task and it
+requires a properly configuration of deployment server.
+
+All required files to copy on deployment server directories are available on mPMT board 
+[release page](https://github.com/gtortone/mpmt-board/releases/latest).
+
+!!! note 
+    For the sake of simplicity also SAMA boot files are included in deployment server directories,
+    but they are not fetched by network during SAMA installation.
+
+Release files must be copied using following schema respecting path and names:
+
+| release file                          | deployment file                        | description                                       |
+|---------------------------------------|----------------------------------------|---------------------------------------------------| 
+|  at91bootstrap.bin                    | `/mpmt/sama/at91bootstrap.bin`         | SAMA first stage bootloader                       |
+|  at91-sama5d27-u-boot.bin             | `/mpmt/sama/u-boot.bin`                | SAMA U-Boot                                       |
+|  at91-sama5d27_som1_ek.dtb            | `/mpmt/sama/at91-sama5d27_som1_ek.dtb` | SAMA device tree                                  |
+|  at91-sama5d27-zImage                 | `/mpmt/sama/zImage`                    | SAMA Linux kernel image                           |
+|  at91-sama5d27-rootfs.wic             | `/mpmt/sama/at91-sama5d27-rootfs.wic`  | SAMA root filesystem image                        |
+|  BOOT.BIN                             | `/mpmt/zynq/default/BOOT.BIN`          | Zynq FPGA bitstream, FSBL and U-Boot              |
+|  image.ub                             | `/mpmt/zynq/default/image.ub`          | Zynq Linux kernel, device tree and minimal rootfs |
+|  zynq-mpmt-debian.tar.lz4             | `/mpmt/zynq/rfs-images/zynq-mpmt-debian.tar.lz4` | Zynq Linux root filesystem image        |
+
+!!! warning
+    This initial configuration of deployment server does not take into account different FPGA bitstream (led / plain) as at time of
+    writing this guide they are still in development. It also does not take into account mPMT board customization using MAC address.
+
 

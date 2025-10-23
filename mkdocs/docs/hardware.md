@@ -28,10 +28,11 @@
 
 ## On-board jumpers
 
-| Name | Description   | 1-2 closed | 2-3 closed |
-| ----------- | -------|------------|------------|
-| `JT3`    | SAMA eMMC enable | external eMMC enabled | external eMMC disabled |
-| `JT4`    | QSPI boot enable | QSPI boot enabled | QSPI boot disabled |
+| Name        | Description      | 1-2 closed            | 2-3 closed             |
+| ----------- | -----------------|-----------------------|------------------------|
+| `JT2`       | Zynq boot mode   | JTAG boot             | QSPI boot              |
+| `JT3`       | SAMA eMMC enable | external eMMC enabled | external eMMC disabled |
+| `JT4`       | QSPI boot enable | QSPI boot enabled     | QSPI boot disabled     |
 
 ## Communication bus
 
