@@ -132,7 +132,20 @@ at U-Boot prompt:
 run bootqspi
 ```
 
-#### Manual QSPI flashing
+#### Manual QSPI flashing (from U-Boot)
+
+It is possible to flash `mtd:bootbin` and `mtd:fitimage` QSPI partitions using U-Boot scripts:
+
+```
+run flash_bootbin
+run flash_fitimage
+```
+
+The download protocol is fixed as TFTP and environment variable used must be defined using uEnv.txt with openocd or
+manually. Files will be fetched from deployment server using [file fetching priority](zynq-bringup.md#file-fetching-priority).
+
+
+#### Manual QSPI flashing (from Linux)
 
 It is possible to manually run setup scripts starting from QSPI boot. Setup scripts are located in `/opt/setup-scripts`.
 Setup scripts to initialize QSPI flash partitions (`deploy_qspi_bootbin`, `deploy_qspi_fitimage`, `deploy_qspi_userdata`) 
