@@ -159,9 +159,27 @@ run bootnet
 
 If everything goes fine a Linux login prompt will be displayed on UART console.
 
-### AT91bootstrap/U-Boot rescue in place using deployment server
+### SAMA upgrade in-place without using SAM-BA
 
-```shell
+If SAM-BA cannot be used (micro USB connector is not accessible) it is possible to upgrade SAMA
+following these steps.
+
+!!! note
+    Make sure deployment server is up with running TFTP server and SAMA related files are in mpmt/sama
+    directory.
+
+Connect to Zynq and open SAMA UART console:
+
+```
+minicom -D /dev/ttyUL1
+```
+
+Reboot Linux and interrupt U-Boot countdown hitting a key.
+
+Flash SAMA QSPI with AT91bootstrap and U-Boot fetching them from deployment server and reset
+at end:
+
+```
 dhcp
 
 sf probe
@@ -173,4 +191,31 @@ sf write 0x21100000 0 ${filesize}
 
 tftpboot 0x21A00000 mpmt/sama/u-boot.bin
 sf write 0x21A00000 0x00040000 ${filesize}
+
+reset
 ```
+
+Interrupt U-Boot countdown hitting a key and start SAMA network boot:
+
+```
+run bootnet
+```
+
+Login to Linux and start netcat to receive root filesystem image from network:
+
+```
+nc -l -p 1234 | dd bs=16M of=/dev/mmcblk0
+```
+
+On deployment server send root filesystem image to SAMA:
+
+```
+dd bs=16M if=at91-sama5d27-rootfs.wic | nc <sama_ip_addr> 1234
+```
+
+Reboot Linux and wait for SAMA automatic boot from eMMC:
+
+```
+sync ; reboot
+```
+
