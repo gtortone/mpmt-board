@@ -3,6 +3,7 @@
 source /usr/bin/gpio.sh
 
 ftdi 1
+jtag 1
 
 # wait for FTDI
 sleep 1
