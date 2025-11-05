@@ -7,7 +7,8 @@ eval $(cat /proc/cmdline | grep -o '\bmpmttype=[^ ]*')
 
 if [[ -n "$mpmtsn" ]]; then
    echo "I: flashing mPMT sn $mpmtsn to QSPI"
-   echo "mpmtsn=$mpmtsn" > /tmp/mpmtsn ; fw_setenv -s /tmp/mpmtsn ; rm /tmp/mpmtsn
+   # if QSPI partition is not initialized a default environment is needed
+   echo "mpmtsn=$mpmtsn" > /tmp/mpmtsn ; fw_setenv -f /tmp/mpmtsn -s /tmp/mpmtsn ; rm /tmp/mpmtsn
 fi
 
 if [[ -n "$mpmttype" ]]; then
