@@ -66,6 +66,29 @@ A very simple and reliable HTTP server is [http-server](https://github.com/http-
 Usage is quite intuitive because it runs by default on port 8080 and accept as first parameter
 the home directory to serve on HTTP.
 
+### HTTP server startup at boot
+
+[Supervisord](https://supervisord.org) can be used to configure automatic startup of http-server at boot.
+
+A configuration file for http-server is needed in `/etc/supervisor/conf.d` directory:
+
+```
+[program:http-server]
+command=/usr/bin/http-server /srv/tftp
+stdout_logfile=/var/log/http-server-stdout.log
+stdout_logfile_maxbytes=1MB
+stdout_logfile_backups=5
+stderr_logfile=/var/log/http-server-stderr.log
+stderr_ogfile_maxbytes=1MB
+stderr_logfile_backups=5
+```
+
+Supervisord daemon must be started at Linux boot:
+
+```
+systemctl enable --now supervisord.service
+```
+
 ## Directories organization
 
 !!! note
@@ -129,6 +152,7 @@ Release files must be copied using following schema respecting path and names:
 |  at91-sama5d27_som1_ek.dtb            | `/mpmt/sama/at91-sama5d27_som1_ek.dtb` | SAMA device tree                                  |
 |  at91-sama5d27-zImage                 | `/mpmt/sama/zImage`                    | SAMA Linux kernel image                           |
 |  at91-sama5d27-rootfs.wic             | `/mpmt/sama/at91-sama5d27-rootfs.wic`  | SAMA root filesystem image                        |
+|  sama-mpmt-image-sama5d27-som1-ek-sd.rootfs.cpio.gz.u-boot | `/mpmt/sama/rootfs.cpio.gz` | SAMA minimal root filesystem image |
 |  BOOT.BIN                             | `/mpmt/zynq/default/BOOT.BIN`          | Zynq FPGA bitstream, FSBL and U-Boot              |
 |  image.ub                             | `/mpmt/zynq/default/image.ub`          | Zynq Linux kernel, device tree and minimal rootfs |
 |  zynq-mpmt-debian.tar.lz4             | `/mpmt/zynq/rfs-images/zynq-mpmt-debian.tar.lz4` | Zynq Linux root filesystem image        |
