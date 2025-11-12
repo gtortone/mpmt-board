@@ -1,0 +1,13 @@
+[Unit]
+Description=RunControl TCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/fd-mpmt-scripts
+ExecStart=/usr/bin/python3 rc_tcp.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

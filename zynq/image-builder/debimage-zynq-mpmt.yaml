@@ -149,6 +149,18 @@ actions:
 
   - action: run
     chroot: true
+    command: mkdir -p /opt/fd-mpmt-scripts
+
+  - action: overlay
+    source: overlays/rc-tcp
+    destination: /opt/fd-mpmt-scripts
+
+  - action: run
+    chroot: true
+    command: mv /opt/fd-mpmt-scripts/rc_tcp.service /etc/systemd/system
+
+  - action: run
+    chroot: true
     command: echo "en_US.UTF-8 UTF-8" > /etc/locale.gen; /usr/sbin/locale-gen; /usr/sbin/update-locale LANG=en_US.UTF-8
 
   - action: overlay
