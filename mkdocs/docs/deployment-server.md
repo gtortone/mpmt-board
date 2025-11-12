@@ -136,6 +136,12 @@ for standard mPMT board (plain) or 'led equipped' mPMT board (led).
 While SAMA installation is done using SAM-BA tool, Zynq installation is a quite complex task and it
 requires a properly configuration of deployment server.
 
+A script is available in mpmt-board repository (`scripts/populate-dir.sh`) to populate TFTP server home directory
+and SAMA support directory. User can set directories location changing `$TFTPDIR` and `$SUPPORTDIR` defined
+in the script.
+
+SAMA support directory can be used with SAM-BA to bring-up SAMA.
+
 All required files to copy on deployment server directories are available on mPMT board 
 [release page](https://github.com/gtortone/mpmt-board/releases/latest).
 
@@ -147,15 +153,17 @@ Release files must be copied using following schema respecting path and names:
 
 | release file                          | deployment file                        | description                                       |
 |---------------------------------------|----------------------------------------|---------------------------------------------------| 
-|  at91bootstrap.bin                    | `/mpmt/sama/at91bootstrap.bin`         | SAMA first stage bootloader                       |
-|  at91-sama5d27-u-boot.bin             | `/mpmt/sama/u-boot.bin`                | SAMA U-Boot                                       |
-|  at91-sama5d27_som1_ek.dtb            | `/mpmt/sama/at91-sama5d27_som1_ek.dtb` | SAMA device tree                                  |
-|  at91-sama5d27-zImage                 | `/mpmt/sama/zImage`                    | SAMA Linux kernel image                           |
-|  at91-sama5d27-rootfs.wic             | `/mpmt/sama/at91-sama5d27-rootfs.wic`  | SAMA root filesystem image                        |
-|  sama-mpmt-image-sama5d27-som1-ek-sd.rootfs.cpio.gz.u-boot | `/mpmt/sama/rootfs.cpio.gz` | SAMA minimal root filesystem image |
-|  BOOT.BIN                             | `/mpmt/zynq/default/BOOT.BIN`          | Zynq FPGA bitstream, FSBL and U-Boot              |
-|  image.ub                             | `/mpmt/zynq/default/image.ub`          | Zynq Linux kernel, device tree and minimal rootfs |
-|  zynq-mpmt-debian.tar.lz4             | `/mpmt/zynq/rfs-images/zynq-mpmt-debian.tar.lz4` | Zynq Linux root filesystem image        |
+|  at91bootstrap.bin                    | `$TFTPDIR/mpmt/sama/at91bootstrap.bin`         | SAMA first stage bootloader                       |
+|  at91-sama5d27-u-boot.bin             | `$TFTPDIR/mpmt/sama/u-boot.bin`                | SAMA U-Boot                                       |
+|  at91-sama5d27_som1_ek.dtb            | `$TFTPDIR/mpmt/sama/at91-sama5d27_som1_ek.dtb` | SAMA device tree                                  |
+|  at91-sama5d27-zImage                 | `$TFTPDIR/mpmt/sama/zImage`                    | SAMA Linux kernel image                           |
+|  sama-mpmt-image-sama5d27-som1-ek-sd.rootfs.cpio.gz.u-boot | `$TFTPDIR/mpmt/sama/rootfs.cpio.gz` | SAMA minimal root filesystem image |
+|  BOOT.BIN                             | `$TFTPDIR/mpmt/zynq/default/BOOT.BIN`          | Zynq FPGA bitstream, FSBL and U-Boot              |
+|  image.ub                             | `$TFTPDIR/mpmt/zynq/default/image.ub`          | Zynq Linux kernel, device tree and minimal rootfs |
+|  zynq-mpmt-debian.tar.lz4             | `$TFTPDIR/mpmt/zynq/rfs-images/zynq-mpmt-debian.tar.lz4` | Zynq Linux root filesystem image        |
+|  at91bootstrap.bin                    | `$SUPPORTDIR/sama/at91bootstrap.bin`           | SAMA first stage bootloader                       |
+|  at91-sama5d27-u-boot.bin             | `$SUPPORTDIR/sama/u-boot.bin`                  | SAMA U-Boot                                       |
+|  at91-sama5d27-rootfs.wic             | `$SUPPORTDIR/sama/at91-sama5d27-rootfs.wic`                  | SAMA root filesystem image                        |
 
 !!! warning
     This initial configuration of deployment server does not take into account different FPGA bitstream (led / plain) as at time of

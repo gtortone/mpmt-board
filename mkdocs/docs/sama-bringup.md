@@ -51,6 +51,9 @@ After last step SAM-BA bootloader is listening for commands.
 
 ## QSPI setup
 
+!!! note
+    Related files for QSPI setup can be fetched with `populate-dir.sh` [script](deployment-server.md#configuration) that will copy them in `/opt/support/sama` directory
+
 Required files available from latest [mpmt-board release](https://github.com/gtortone/mpmt-board/releases/latest):
 
 * [at91bootstrap.bin](https://github.com/gtortone/mpmt-board/releases/latest/download/at91bootstrap.bin)
@@ -71,6 +74,9 @@ sam-ba -p usb -b sama5d27-som1-ek -a qspiflash -c write:u-boot.bin:0x00040000 -c
 ```
 
 ## eMMC setup
+
+!!! note
+    Related files for eMMC setup can be fetched with `populate-dir.sh` [script](deployment-server.md#configuration) that will copy them in `/opt/support/sama` directory
 
 Required rootfs file is available from latest [mpmt-board release](https://github.com/gtortone/mpmt-board/releases/latest):
 
