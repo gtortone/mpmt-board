@@ -30,7 +30,7 @@ tftphome=/mpmt/zynq/
 #
 # settings for HTTP server
 #
-httphost=10.1.3.3
+#httphost=10.1.3.3
 httpport=8080
 httphome=/mpmt/zynq
 

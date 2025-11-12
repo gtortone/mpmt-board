@@ -88,10 +88,10 @@ Using an additional SSH session on SAMA user can start main setup script after [
 
 ```
 cd /opt/jtag-script
-./boot-zynq
+./boot-zynq.sh
 ```
 
-The script `boot-zynq` uses openocd to inject U-Boot image and uEnv.txt to Zynq DDR. The whole bring-up process takes around 6 minutes
+The script `boot-zynq.sh` uses openocd to inject U-Boot image and uEnv.txt to Zynq DDR. The whole bring-up process takes around 6 minutes
 during which status messages are displayed on serial console. QSPI flash and eMMC are partitioned and initialized with files fetched
 from deployment server using environment passed with uEnv.txt. The Linux login prompt indicates end of bring-up process.
 
