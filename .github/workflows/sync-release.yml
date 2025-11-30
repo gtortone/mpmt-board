@@ -1,0 +1,94 @@
+name: Sync Release to GitLab
+
+on:
+  release:
+    types: [published]   # Parte solo quando pubblichi una release
+  workflow_dispatch:      # Possibilità di lancio manuale
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+
+      - name: Create sync script
+        run: |
+          cat > sync_release.sh << 'EOF'
+          #!/bin/bash
+          set -e
+
+          GITHUB_OWNER="gtortone"
+          GITHUB_REPO="mcc-board"
+          GITHUB_TOKEN="${SOURCE_TOKEN}"          # Dal secret GitHub
+
+          GITLAB_PROJECT_ID="172"
+          GITLAB_TOKEN="${TARGET_TOKEN}"          # Dal secret GitHub
+
+          echo "📥 Recupero l'ultima release da GitHub..."
+
+          curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/latest > /tmp/RELEASE_JSON
+
+          echo "view RELEASE_JSON"
+          cat /tmp/RELEASE_JSON
+
+          TAG_NAME=$(cat /tmp/RELEASE_JSON | jq -r '.tag_name')
+          RELEASE_NAME=$(cat /tmp/RELEASE_JSON | jq -r '.name')
+          RELEASE_BODY=$(cat /tmp/RELEASE_JSON | jq -r '.body')
+
+          echo "Trovata release: $TAG_NAME"
+
+          ASSETS=$(cat /tmp/RELEASE_JSON | jq -c '.assets[]?')
+
+          echo "📤 Creo o aggiorno la release su GitLab..."
+
+          curl -s --request POST \
+            --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+            --data "name=$RELEASE_NAME" \
+            --data-urlencode "description=$RELEASE_BODY" \
+            --data "tag_name=$TAG_NAME" \
+            "https://git.hyperk.org/api/v4/projects/$GITLAB_PROJECT_ID/releases" \
+            > /dev/null || true
+
+          for asset in $ASSETS; do
+            URL=$(echo "$asset" | jq -r '.browser_download_url')
+            FILENAME=$(echo "$asset" | jq -r '.name')
+
+            echo "📦 Scarico asset: $FILENAME"
+            curl -L -o "$FILENAME" "$URL"
+
+            echo "⬆️ Carico asset su GitLab..."
+            UPLOAD_RESPONSE=$(curl -s --request POST \
+              --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+              --form "file=@$FILENAME" \
+              "https://git.hyperk.org/api/v4/projects/$GITLAB_PROJECT_ID/uploads")
+
+            ASSET_URL=$(echo "$UPLOAD_RESPONSE" | jq -r '.full_path')
+
+            echo "🔗 Allego asset alla release..."
+            curl -s --request POST \
+              --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+              --data "name=$FILENAME" \
+              --data "url=https://git.hyperk.org$ASSET_URL" \
+              "https://git.hyperk.org/api/v4/projects/$GITLAB_PROJECT_ID/releases/$TAG_NAME/assets/links" \
+              > /dev/null
+
+            rm "$FILENAME"
+          done
+
+          echo "✅ Sincronizzazione completata!"
+          EOF
+
+          chmod +x sync_release.sh
+
+      - name: Run sync script
+        env:
+          SOURCE_TOKEN: ${{ secrets.SOURCE_TOKEN }}
+          TARGET_TOKEN: ${{ secrets.TARGET_TOKEN }}
+        run: ./sync_release.sh
