@@ -25,10 +25,10 @@ jobs:
           set -e
 
           GITHUB_OWNER="gtortone"
-          GITHUB_REPO="mcc-board"
+          GITHUB_REPO="mpmt-board"
           GITHUB_TOKEN="${SOURCE_TOKEN}"          # Dal secret GitHub
 
-          GITLAB_PROJECT_ID="172"
+          GITLAB_PROJECT_ID="173"
           GITLAB_TOKEN="${TARGET_TOKEN}"          # Dal secret GitHub
 
           echo "📥 Recupero l'ultima release da GitHub..."
