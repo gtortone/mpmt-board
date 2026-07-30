@@ -1,0 +1,12 @@
+
+[Unit]
+Description=Mount /data
+
+[Mount]
+What=/dev/disk/by-partlabel/data
+Where=/data
+Type=ext4
+Options=defaults
+
+[Install]
+WantedBy=multi-user.target

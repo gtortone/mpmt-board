@@ -6,6 +6,12 @@
   };
 };
 
+&L2 {
+    arm,prefetch-offset = <7>;
+    arm,double-linefill = <1>;
+    arm,double-linefill-incr = <1>;
+};
+
 &qspi {
  #address-cells = <1>;
  #size-cells = <0>;

@@ -1,0 +1,8 @@
+
+architecture: {{ .architecture }}
+
+actions:
+  - action: apt
+    packages:
+      - ntpdate
+

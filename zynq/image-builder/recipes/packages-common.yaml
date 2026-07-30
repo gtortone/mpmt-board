@@ -1,0 +1,73 @@
+
+architecture: {{ .architecture }}
+
+actions:
+  - action: apt
+    packages:
+      - sudo
+      - openssh-server
+      - systemd-sysv
+      - apt-utils
+      - dialog
+      - locales
+      - bash-completion
+      - systemd-timesyncd
+      - telnet
+      - screen
+      - minicom
+      - nload
+      - picocom
+      - curl
+      - haveged
+      - dhcpcd5
+      - fdisk
+      - udev 
+      - netbase 
+      - ifupdown 
+      - iputils-ping 
+      - wget 
+      - net-tools
+      - nano
+      - less
+      - kmod 
+      - vim
+      - file
+      - iperf3
+      - systemd-resolved
+      - squashfs-tools
+      - rauc
+      - rauc-service
+      - parted
+      - git
+      - ca-certificates
+      - man-db
+      - gcc 
+      - g++ 
+      - tcl
+      - python3
+      - python3-pip
+      - make 
+      - pkg-config 
+      - libusb-dev 
+      - cmake 
+      - zlib1g 
+      - zlib1g-dev 
+      - usbutils
+      - stm32flash
+      - i2c-tools
+      - nfs-common
+      - libi2c-dev
+      - libmodbus-dev
+      - libmodbus5
+      - mtd-utils
+      - mbpoll
+      - libubootenv-tool
+      - python3-numpy
+      - python3-dev
+      - libfmt-dev
+      - libboost-iostreams-dev
+      - libboost-date-time-dev
+      - libboost-serialization-dev
+      - libzmq3-dev
+      - cppzmq-dev
+

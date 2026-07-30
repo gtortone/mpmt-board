@@ -1,0 +1,9 @@
+
+architecture: {{ .architecture }}
+
+actions:
+  - action: apt
+    packages:
+      - ntpsec-ntpdate
+      - e2fsprogs
+

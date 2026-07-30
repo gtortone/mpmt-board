@@ -66,20 +66,12 @@ fi
 
 echo -e "\n>>> TASK START >>> deploy_emmc_rootfs\n"
 
-umount /dev/mmcblk0p1 2>/dev/null
-
 echo "I: setup eMMC partitions"
-sfdisk --delete /dev/mmcblk0
-echo ",,83,*" | sfdisk /dev/mmcblk0
-umount /dev/mmcblk0p1 2>/dev/null
+$dir/create_parts.sh -y /dev/mmcblk0
 
-echo "I: setup eMMC filesystem"
-mkfs.ext4 -F /dev/mmcblk0p1
-
-echo "I: mount eMMC to /target"
-mkdir /target ; mount /dev/mmcblk0p1 /target
+echo "I: mount rootfs A to /target"
+mkdir -p /target ; mount /dev/disk/by-partlabel/rootfs-a /target
 cd /target
-
 
 if [ "$protocol" = "tftp" ]; then
    src_tarfile=$tarfile
@@ -89,13 +81,13 @@ if [ "$protocol" = "tftp" ]; then
       echo "I: unpacking rootfs"
       case "$dst_tarfile" in
          *.tar.gz)
-            cmd="pv $dst_tarfile | tar xzfp - --warning=no-timestamp"
+            pv ${dst_tarfile} | tar xzfp - --warning=no-timestamp -C /target
             ;;
          *.tar.lz4)
-            cmd="pv $dst_tarfile | tar xfp - --warning=no-timestamp -I lz4"
+            pv ${dst_tarfile} | tar xfp - --warning=no-timestamp -I lz4 -C /target
             ;;
          *.tar)
-            cmd="pv $dst_tarfile | tar xfp - --warning=no-timestamp"
+            pv ${dst_tarfile} | tar xfp - --warning=no-timestamp -C /target
             ;;
          *)
             echo "E: filename $dst_tarfile not found or not supported"
@@ -110,13 +102,13 @@ else
    echo "I: unpacking rootfs from $protocol://$host:$port$home/$tarfile"
    case "$tarfile" in
       *.tar.gz) 
-         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xzfp - --warning=no-timestamp"
+         wget -O - ${protocol}://${host}:${port}${home}/${tarfile} | tar xzfp - --warning=no-timestamp -C /target
          ;;
       *.tar.lz4)
-         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xfp - --warning=no-timestamp -I lz4"
+         wget -O - ${protocol}://${host}:${port}${home}/${tarfile} | tar xfp - --warning=no-timestamp -I lz4 -C /target
          ;;
       *.tar)
-         cmd="wget -O - $protocol://$host:$port$home/$tarfile | tar xfp - --warning=no-timestamp"
+         wget -O - ${protocol}://${host}:${port}${home}/${tarfile} | tar xfp - --warning=no-timestamp -C /target
          ;;
       *)
          echo "E: filename $tarfile not found or not supported"
@@ -125,9 +117,7 @@ else
    esac
 fi
 
-eval "$cmd"
-
-cd / 
+cd /
 umount /target
 
 if [ "$?" -eq "0" ]; then

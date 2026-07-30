@@ -1,6 +1,29 @@
 #!/bin/bash
 
-DEBIAN_RELEASE=12
+# exit at first error 
+set -euo pipefail
+
+SUITE=$1
+OUTDIR_SUFFIX=images
+
+case "$SUITE" in
+   bookworm|trixie)
+      ;;
+   *)
+      echo "E: suites available: bookworm, trixie"
+      exit
+      ;;
+esac
+
+OUTDIR=${OUTDIR_SUFFIX}/${SUITE}
+
+mkdir -p ${OUTDIR}
+
+echo "suite: ${SUITE}"
+echo "outdir: ${OUTDIR}"
+
+###
+
 PL_PROJECT_BASE=~/devel/HyperK/PROD-ZYNQ7/petalinux/pl-mpmt/images/linux
 TMPDIR=$PL_PROJECT_BASE/tmp
 
@@ -15,10 +38,19 @@ echo "copy PetaLinux files..."
 #cp $PL_PROJECT_BASE/system.dtb overlays/boot
 cp $PL_PROJECT_BASE/image.ub overlays/boot
 
-echo "start Linux image build..."
-sudo debos -t image:zynq-mpmt-debian.img --cpus=8 --disable-fakemachine debimage-zynq-mpmt.yaml
+echo "start Linux Debian ${SUITE} image build..."
+sudo debos \
+   -t outdir:${OUTDIR} \
+   -t image:zynq-mpmt-debian-${SUITE}.img \
+   -t suite:${SUITE} \
+   --cpus=8 \
+   --disable-fakemachine debimage-zynq-mpmt.yaml
 
 sudo losetup -D
 
-lz4 --favor-decSpeed zynq-mpmt-debian.tar
-gzip -k zynq-mpmt-debian.tar
+sudo chown -R ${USER}:${USER} ${OUTDIR_SUFFIX}
+
+echo "prepare RAUC bundle content..."
+cp ${OUTDIR}/rootfs.ext4 bundle-content
+
+echo "Bye!"

@@ -16,6 +16,9 @@ if [[ -n "$mpmttype" ]]; then
    echo "mpmttype=$mpmttype" > /tmp/mpmttype ; fw_setenv -s /tmp/mpmttype ; rm /tmp/mpmttype
 fi
 
+echo "I: flashing BOOT_ORDER to QSPI"
+echo "BOOT_ORDER=A B" > /tmp/boot_order; fw_setenv -s /tmp/boot_order; rm /tmp/boot_order
+
 echo -e "\n>>> TASK FINISH >>> deploy_qspi_userdata\n"
 
 exit

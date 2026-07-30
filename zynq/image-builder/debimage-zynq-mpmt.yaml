@@ -1,107 +1,31 @@
-{{- $image := or .image "debian.img" -}}
+{{- $suite := or .suite "bookworm" -}}
+{{- $outdir := or .outdir "images" -}}
+{{- $image := or .image "debian" -}}
 
 architecture: armhf
 
 actions:
 
   - action: debootstrap
-    suite: "bookworm"
+    suite: "{{ $suite }}"
     components:
       - main
     mirror: https://deb.debian.org/debian
     variant: minbase
 
-  - action: apt
-    packages: 
-      - sudo
-      - openssh-server
-      - systemd-sysv
+  - action: recipe
+    recipe: recipes/packages-common.yaml
+
+  - action: recipe
+    recipe: recipes/packages-{{ $suite }}.yaml
 
   - action: run
     chroot: true
     command: echo zynq > /etc/hostname
 
-  - action: apt
-    packages:
-      - apt-utils
-      - dialog
-      - locales
-      - bash-completion
-
-  - action: apt
-    packages:
-      - systemd-timesyncd
-      - telnet
-      - screen
-      - minicom
-      - nload
-      - picocom
-      - curl
-      - haveged
-      - dhcpcd5
-      - fdisk
-      - udev 
-      - netbase 
-      - ifupdown 
-      - iputils-ping 
-      - wget 
-      - net-tools
-      - ntpdate
-      - nano
-      - less
-      - kmod 
-      - vim
-      - file
-      - iperf3
-      - systemd-resolved
-
-  - action: apt
-    packages:
-      - parted
-      - git
-      - ca-certificates
-
-  - action: apt
-    packages:
-      - man-db
-      - gcc 
-      - g++ 
-      - tcl
-      - python3
-      - python3-pip
-      - make 
-      - pkg-config 
-      - libusb-dev 
-      - cmake 
-      - zlib1g 
-      - zlib1g-dev 
-      - usbutils
-      - stm32flash
-      - i2c-tools
-      - nfs-common
-      - libi2c-dev
-      - libmodbus-dev
-      - libmodbus5
-      - mtd-utils
-      - mbpoll
-      - libubootenv-tool
-
-  - action: apt
-    packages:
-      - python3-numpy
-      - python3-dev
-      - libfmt9
-      - libfmt-dev
-      - libboost-iostreams1.74.0
-      - libboost-iostreams1.74-dev
-      - libboost-date-time1.74.0
-      - libboost-date-time1.74-dev
-      - libboost-serialization1.74.0
-      - libboost-serialization1.74-dev
-
   - action: run
     chroot: true
-    command: pip3 install minimalmodbus cmd2==2.7.0 colorama smbus2 pymodbus==3.9.2 psutil --break-system-packages
+    command: pip3 install minimalmodbus cmd2==2.7.0 colorama smbus2 pymodbus==3.9.2 psutil uv --break-system-packages
 
   - action: overlay
     source: overlays/boot
@@ -111,41 +35,29 @@ actions:
     source: overlays/etc
     destination: /etc
 
+  - action: overlay
+    source: overlays/rauc
+    destination: /
+
   - action: run
     chroot: true
     script: scripts/untar-modules.sh
-    
+
   - action: run
     chroot: true
-    script: scripts/install-mbusd.sh
+    script: scripts/install-zynq-info.sh
 
-  #- action: run
-  #  chroot: true
-  #  script: scripts/install-midas.sh
-
-  #- action: overlay
-  #  source: overlays/midas
-  #  destination: /opt/midas
-
+  - action: run
+    chroot: true
+    script: scripts/install-mpmt-mss.sh
+    
   - action: run
     chroot: true
     script: scripts/install-mpmt-board-cli.sh
 
-  #- action: run
-  #  chroot: true
-  #  script: scripts/install-mpmt-board-midas.sh
-
-  - action: run
-    chroot: true
-    script: scripts/install-libzmq.sh
-
   - action: run
     chroot: true
     script: scripts/install-mpmt-readout.sh
-
-  - action: run
-    chroot: true
-    script: scripts/install-tooldaq.sh
 
   - action: run
     chroot: true
@@ -158,6 +70,10 @@ actions:
   - action: run
     chroot: true
     command: mv /opt/fd-mpmt-scripts/rc_tcp.service /etc/systemd/system
+
+  - action: run
+    chroot: true
+    command: cp /opt/mpmt-mss/contrib/systemd/mpmt-mss.service /etc/systemd/system
 
   - action: run
     chroot: true
@@ -191,13 +107,29 @@ actions:
     source: overlays/scripts
     destination: /usr/bin
 
+  - action: overlay
+    source: overlays/firstboot
+    destination: /
+
+  - action: run
+    chroot: true
+    command: systemctl enable grow-rootfs.service
+
   - action: run
     chroot: true
     command: systemctl enable serial-getty@ttyPS0.service
 
   - action: run
     chroot: true
-    command: systemctl enable mbusd@ttyPS1.service
+    command: systemctl enable rauc.service
+
+  - action: run
+    chroot: true
+    command: systemctl enable data.mount
+
+  - action: run
+    chroot: true
+    command: systemctl enable mpmt-mss.service
 
   - action: run
     chroot: true
@@ -207,8 +139,13 @@ actions:
     chroot: true
     command: echo 'root:$1$TzpfaNEc$tjqCamkIJFUytJokydS8w.' | /usr/sbin/chpasswd -e
 
+  - action: run
+    chroot: false
+    label: mkfs
+    command: mke2fs -F -t ext4 -b 4096 -L rootfs -O ^orphan_file,^metadata_csum_seed -E root_owner=0:0 -d "$ROOTDIR" "$ARTIFACTDIR/{{ $outdir }}/rootfs.ext4" 3G
+
   - action: image-partition
-    imagename: {{ $image }}
+    imagename: "{{ $outdir }}/{{ $image }}"
     imagesize: 3.0GB
     partitiontype: msdos
     mountpoints:
@@ -216,7 +153,7 @@ actions:
         partition: rootfs
     partitions:
       - name: rootfs
-        features: ["^orphan_file"]
+        features: ["^orphan_file", "^metadata_csum_seed"]
         fs: ext4
         start: 0%
         end: 100%
@@ -226,5 +163,14 @@ actions:
 
   - action: pack
     compression: none
-    file: zynq-mpmt-debian.tar
+    file: {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar
+
+  - action: pack
+    compression: gz
+    file: {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar.gz
+
+  - action: run
+    chroot: false
+    label: lz4
+    command: lz4 --favor-decSpeed {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar.lz4
 

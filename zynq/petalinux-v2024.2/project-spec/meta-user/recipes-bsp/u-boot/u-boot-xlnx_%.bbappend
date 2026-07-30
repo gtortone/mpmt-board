@@ -1,4 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI:append = " file://platform-top.h file://bsp.cfg file://0001-add-default-environment.patch "
+SRC_URI:append = " file://platform-top.h file://bsp.cfg file://default.env"
 
+do_configure:prepend() {
+    cp ${WORKDIR}/default.env ${S}/default.env
+}

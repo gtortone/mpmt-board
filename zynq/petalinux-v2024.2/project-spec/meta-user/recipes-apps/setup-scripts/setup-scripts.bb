@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI = "file://run_tasks \
 	   file://runtasks \
 	   file://functions.sh \
+	   file://create_parts.sh \
 	   file://deploy_emmc_rootfs \
 	   file://deploy_qspi_bootbin \
 	   file://deploy_qspi_fitimage \
@@ -24,6 +25,7 @@ do_install() {
    install -d ${D}/opt/setup-scripts
    install -m 0755 run_tasks ${D}/opt/setup-scripts
    install -m 0644 functions.sh ${D}/opt/setup-scripts
+   install -m 0755 create_parts.sh ${D}/opt/setup-scripts
    install -m 0755 deploy_emmc_rootfs ${D}/opt/setup-scripts
    install -m 0755 deploy_qspi_bootbin ${D}/opt/setup-scripts
    install -m 0755 deploy_qspi_fitimage ${D}/opt/setup-scripts
