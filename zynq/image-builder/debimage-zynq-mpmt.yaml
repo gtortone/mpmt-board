@@ -1,4 +1,5 @@
 {{- $suite := or .suite "bookworm" -}}
+{{- $version:= or .version "12" -}}
 {{- $outdir := or .outdir "images" -}}
 {{- $image := or .image "debian" -}}
 
@@ -12,6 +13,10 @@ actions:
       - main
     mirror: https://deb.debian.org/debian
     variant: minbase
+
+  #- action: run
+  #  chroot: false
+  #  command: scripts/test.sh
 
   - action: recipe
     recipe: recipes/packages-common.yaml
@@ -44,6 +49,10 @@ actions:
     script: scripts/untar-modules.sh
 
   - action: run
+    chroot: false
+    script: scripts/install-libtooldaq.sh {{ $version }}
+
+  - action: run
     chroot: true
     script: scripts/install-zynq-info.sh
 
@@ -61,11 +70,19 @@ actions:
 
   - action: run
     chroot: true
+    script: scripts/install-mbusd.sh
+
+  - action: run
+    chroot: true
     command: mkdir -p /opt/fd-mpmt-scripts
 
   - action: overlay
     source: overlays/rc-tcp
     destination: /opt/fd-mpmt-scripts
+
+  - action: overlay
+    source: overlays/staging
+    destination: /
 
   - action: run
     chroot: true
@@ -133,6 +150,10 @@ actions:
 
   - action: run
     chroot: true
+    command: systemctl enable mpmt-producer.service
+
+  - action: run
+    chroot: true
     command: echo "ttyPS0" >> /etc/securetty
 
   - action: run
@@ -172,5 +193,5 @@ actions:
   - action: run
     chroot: false
     label: lz4
-    command: lz4 --favor-decSpeed {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar.lz4
+    command: lz4 -f --favor-decSpeed {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar {{ $outdir }}/zynq-mpmt-debian-{{ $suite }}.tar.lz4
 

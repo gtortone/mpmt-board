@@ -16,7 +16,9 @@
 # program PL
 # note: copy system.bit.bin file in /lib/firmware
 #
-echo 0 > /sys/class/fpga_manager/fpga0/flags
-echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
+if [ -f /lib/firmware/system.bit.bin ]; then
+   echo 0 > /sys/class/fpga_manager/fpga0/flags
+   echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
+fi
 
 exit 0

@@ -3,11 +3,20 @@
 # exit at first error 
 set -euo pipefail
 
+if [[ $# -eq 0 ]]; then
+   echo "E: specify suite to build"
+   exit 1
+fi
+
 SUITE=$1
 OUTDIR_SUFFIX=images
 
 case "$SUITE" in
-   bookworm|trixie)
+   bookworm)
+      VERSION=12
+      ;;
+   trixie)
+      VERSION=13
       ;;
    *)
       echo "E: suites available: bookworm, trixie"
@@ -38,11 +47,15 @@ echo "copy PetaLinux files..."
 #cp $PL_PROJECT_BASE/system.dtb overlays/boot
 cp $PL_PROJECT_BASE/image.ub overlays/boot
 
+echo "clean staging directory..."
+sudo rm -rf overlays/staging/*
+
 echo "start Linux Debian ${SUITE} image build..."
 sudo debos \
    -t outdir:${OUTDIR} \
    -t image:zynq-mpmt-debian-${SUITE}.img \
    -t suite:${SUITE} \
+   -t version:${VERSION} \
    --cpus=8 \
    --disable-fakemachine debimage-zynq-mpmt.yaml
 

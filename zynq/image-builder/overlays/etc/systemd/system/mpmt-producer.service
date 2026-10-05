@@ -1,0 +1,14 @@
+[Unit]
+Description=mPMT ToolDAQ producer
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/m-pmt-daq-interface
+ExecStart=/opt/m-pmt-daq-interface/build-arm/producer --daq-config config/InterfaceConfig --data-config config/DataSenderConfig --mss-config config/MSSConfig
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

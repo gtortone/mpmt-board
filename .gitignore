@@ -13,6 +13,7 @@ zynq/image-builder/images
 zynq/image-builder/*.img
 zynq/image-builder/*.tar*
 zynq/image-builder/*.raucb
+zynq/image-builder/overlays/staging/*
 
 zynq/petalinux/project-spec/configs/*.old
 zynq/petalinux/project-spec/configs/config
