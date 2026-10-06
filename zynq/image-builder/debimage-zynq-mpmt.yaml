@@ -146,10 +146,6 @@ actions:
 
   - action: run
     chroot: true
-    command: systemctl enable rauc.service
-
-  - action: run
-    chroot: true
     command: systemctl enable data.mount
 
   - action: run
@@ -189,6 +185,8 @@ actions:
 
   - action: filesystem-deploy
     description: Deploying filesystem onto image
+    setup-fstab: false
+    setup-kernel-cmdline: false
 
   - action: pack
     compression: none
