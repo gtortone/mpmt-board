@@ -24,7 +24,7 @@ set -euo pipefail
 # Tunables
 # ---------------------------------------------------------------------------
 
-DATA_SIZE_MIB=2048        # 2 GiB
+DATA_SIZE_MIB=1024        # 1 GiB
 ALIGN_SECTORS=2048        # 1 MiB alignment (512-byte sectors)
 GPT_TAIL_SECTORS=2048     # reserved for the backup GPT at the end of the device
 WIPE_SECTORS=2048         # head/tail area zeroed before repartitioning
@@ -42,7 +42,8 @@ LINUX_FS_TYPE="linux"
 
 # Disable ext4 features that older U-Boot ext4 drivers cannot handle. Adjust
 # this list if your e2fsprogs does not know one of these feature names.
-EXT4_OPTS=(-q -F -E nodiscard -O "^metadata_csum_seed,^orphan_file")
+# reserve 1% of blocks available for disk full (-m)
+EXT4_OPTS=(-m 1 -q -F -E nodiscard -O "^metadata_csum_seed,^orphan_file")
 
 # ---------------------------------------------------------------------------
 # Globals
