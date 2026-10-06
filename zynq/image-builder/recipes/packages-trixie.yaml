@@ -6,4 +6,5 @@ actions:
     packages:
       - ntpsec-ntpdate
       - e2fsprogs
+      - busybox
 
