@@ -44,6 +44,10 @@ actions:
     source: overlays/rauc
     destination: /
 
+  - action: overlay
+    source: overlays/udev
+    destination: /usr/lib/udev
+
   - action: run
     chroot: true
     script: scripts/untar-modules.sh
@@ -71,6 +75,10 @@ actions:
   - action: run
     chroot: true
     script: scripts/install-mbusd.sh
+
+  - action: run
+    chroot: true
+    script: scripts/optimize-boot.sh
 
   - action: run
     chroot: true

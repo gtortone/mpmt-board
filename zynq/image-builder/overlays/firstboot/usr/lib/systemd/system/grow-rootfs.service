@@ -3,11 +3,13 @@ Description=Grow root filesystem to fill its slot
 DefaultDependencies=no
 After=local-fs.target
 Before=sysinit.target
+ConditionPathExists=!/etc/grow-rootfs.done
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/sbin/grow-rootfs
+ExecStartPost=/usr/bin/touch /etc/grow-rootfs.done
 
 [Install]
 WantedBy=sysinit.target

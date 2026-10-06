@@ -1,0 +1,2 @@
+# Run nfsrahead only for anonymous bdi devices (major 0), i.e. NFS mounts
+SUBSYSTEM=="bdi", ACTION=="add", KERNEL=="0:*", PROGRAM="/usr/libexec/nfsrahead %k", ATTR{read_ahead_kb}="%c"

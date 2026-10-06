@@ -6,7 +6,7 @@ Description=Mount /data
 What=/dev/disk/by-partlabel/data
 Where=/data
 Type=ext4
-Options=defaults
+Options=defaults,noatime,nofail
 
 [Install]
 WantedBy=multi-user.target
