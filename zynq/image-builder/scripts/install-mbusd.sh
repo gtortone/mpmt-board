@@ -7,9 +7,8 @@ git clone https://github.com/3cky/mbusd.git
 
 cd mbusd
 
-mkdir -p build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-make
-make install
+cmake -B build -DCMAKE_INSTALL_PREFIX=/usr -DSYSTEMD_SERVICES_INSTALL_DIR=/etc/systemd/system
+make -j -C build 
+make -C build install
 
 
