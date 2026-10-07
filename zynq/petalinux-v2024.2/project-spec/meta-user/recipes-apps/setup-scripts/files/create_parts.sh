@@ -24,7 +24,7 @@ set -euo pipefail
 # Tunables
 # ---------------------------------------------------------------------------
 
-DATA_SIZE_MIB=1024        # 1 GiB
+DATA_SIZE_MIB=50          # 50 MiB
 ALIGN_SECTORS=2048        # 1 MiB alignment (512-byte sectors)
 GPT_TAIL_SECTORS=2048     # reserved for the backup GPT at the end of the device
 WIPE_SECTORS=2048         # head/tail area zeroed before repartitioning

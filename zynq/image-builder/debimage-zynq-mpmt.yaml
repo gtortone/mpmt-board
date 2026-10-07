@@ -82,6 +82,10 @@ actions:
 
   - action: run
     chroot: true
+    script: scripts/cleanup.sh
+
+  - action: run
+    chroot: true
     command: mkdir -p /opt/fd-mpmt-scripts
 
   - action: overlay
@@ -155,6 +159,14 @@ actions:
   - action: run
     chroot: true
     command: systemctl enable mpmt-producer.service
+
+  - action: run
+    chroot: true
+    command: systemctl enable stage-setup.service
+
+  - action: run
+    chroot: true
+    command: systemctl enable rauc-mark-good.service
 
   - action: run
     chroot: true

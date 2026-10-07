@@ -9,6 +9,8 @@ WorkingDirectory=/opt/m-pmt-daq-interface
 ExecStart=/opt/m-pmt-daq-interface/build-arm/producer --daq-config config/InterfaceConfig --data-config config/DataSenderConfig --mss-config config/MSSConfig
 Restart=on-failure
 RestartSec=5
+After=stage-setup.service
+BindsTo=stage-setup.service
 
 [Install]
 WantedBy=multi-user.target

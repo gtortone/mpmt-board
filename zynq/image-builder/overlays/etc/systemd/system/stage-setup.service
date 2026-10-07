@@ -1,0 +1,17 @@
+[Unit]
+Description=Use inactive RAUC slot as /stage staging area
+# Only after the booted slot has been confirmed good: until then the
+# inactive slot is the rollback target and must stay intact.
+After=rauc-mark-good.service
+Requires=rauc-mark-good.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/stage-setup.sh
+# If something still uses /stage, umount fails and so does the RAUC
+# pre-install handler: the update is aborted instead of corrupting data.
+ExecStop=/bin/umount /stage
+
+[Install]
+WantedBy=multi-user.target
