@@ -14,4 +14,7 @@ alias mss_cli='uv run /opt/mpmt-mss/src/mpmt_mss/cli/mss_cli.py'
 
 export TERM=linux
 
+# stop here for non interactive sessions
+[[ $- == *i* ]] || return
+
 fpgaver
