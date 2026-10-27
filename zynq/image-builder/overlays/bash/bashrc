@@ -9,6 +9,9 @@ alias l='ls $LS_OPTIONS -lA'
 alias devmem='busybox devmem'
 alias rc=/opt/mpmt-board-cli/runcontrol/rc.py
 alias sn=/opt/mpmt-board-cli/sensors/sn.py
+alias fpgaver=/opt/mpmt-board-cli/fpgaver/fpgaver.py
 alias mss_cli='uv run /opt/mpmt-mss/src/mpmt_mss/cli/mss_cli.py'
 
 export TERM=linux
+
+fpgaver
