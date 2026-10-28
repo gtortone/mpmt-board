@@ -160,6 +160,9 @@ sequenceDiagram
 
 ## Upgrade procedure
 
+!!! warning
+    Before start upgrade please be sure Linux is using current date/time (use `date` command to set/get time)
+
 ### Publish bundle
 
 The bundle must be reachable by the board through HTTP.
