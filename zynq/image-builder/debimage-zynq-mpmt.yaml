@@ -179,11 +179,11 @@ actions:
   - action: run
     chroot: false
     label: mkfs
-    command: mke2fs -F -t ext4 -b 4096 -L rootfs -O ^orphan_file,^metadata_csum_seed -E root_owner=0:0 -d "$ROOTDIR" "$ARTIFACTDIR/{{ $outdir }}/rootfs.ext4" 3G
+    command: mke2fs -F -t ext4 -b 4096 -L rootfs -O ^orphan_file,^metadata_csum_seed -E root_owner=0:0 -d "$ROOTDIR" "$ARTIFACTDIR/{{ $outdir }}/rootfs.ext4" 1500M
 
   - action: image-partition
     imagename: "{{ $outdir }}/{{ $image }}"
-    imagesize: 3.0GB
+    imagesize: 1.5GB
     partitiontype: msdos
     mountpoints:
       - mountpoint: /
