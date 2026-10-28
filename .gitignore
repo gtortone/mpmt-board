@@ -24,3 +24,4 @@ zynq/image-builder/overlays/boot
 zynq/image-builder/bundle-content/*.ext4
 
 mkdocs/venv/
+mkdocs/site/

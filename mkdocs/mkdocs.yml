@@ -27,6 +27,7 @@ nav:
   - 'deployment-server.md'
   - 'sama-bringup.md'
   - 'zynq-bringup.md'
+  - 'zynq-rauc.md'
 
 markdown_extensions:
   - pymdownx.blocks.caption
